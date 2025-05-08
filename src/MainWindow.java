@@ -11,6 +11,7 @@ public class MainWindow {
         window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         window.setSize(800, 500);
         window.setLocationRelativeTo(null);
+        window.setResizable(false);
     }
 
     public void show() {
