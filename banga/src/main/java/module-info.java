@@ -1,7 +1,7 @@
-module com.banga {
+module com.game {
     requires javafx.controls;
     requires javafx.fxml;
-    requires javafx.media;
-    opens com.banga to javafx.fxml;
-    exports com.banga;
+
+    opens com.game to javafx.fxml;
+    exports com.game;
 }
