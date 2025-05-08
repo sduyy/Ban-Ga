@@ -6,15 +6,19 @@ public class MainWindow {
     private JFrame window;
 
     public MainWindow() {
+        initialize();
+    }
+
+    public void initialize() {
         window = new JFrame();
-        window.setTitle("Game Ban Ga");
-        window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        window.setSize(800, 500);
-        window.setLocationRelativeTo(null);
-        window.setResizable(false);
+        this.window.setTitle("Game Ban Ga");
+        this.window.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        this.window.setSize(800,500);        
+        this.window.setLocationRelativeTo(null);
+        this.window.setResizable(false);
     }
 
     public void show() {
-        window.setVisible(true);
+        this.window.setVisible(true);
     }
 }
