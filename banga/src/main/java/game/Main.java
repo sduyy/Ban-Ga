@@ -1,20 +1,32 @@
 package game;
 
 import javafx.application.Application;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 
 public class Main extends Application{
     @Override
     public void start(Stage primaryStage) {
-        BorderPane root = new BorderPane();
-        Scene scene = new Scene(root, 800, 500);
-        root.setCenter(new Button("HUNG GAY"));
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Game Ban Ga");
-        primaryStage.show();
+        try {
+            Stage stage = new Stage(StageStyle.DECORATED);
+            stage.setTitle("Game Ban Ga");
+            BorderPane root = new BorderPane();
+            Scene scene = new Scene(root, 800, 500, Color.BLACK);
+            Image image = new Image(getClass().getResourceAsStream("/player.png"));
+            ImageView iView = new ImageView(image);
+            root.setCenter(iView);
+            scene.setCursor(Cursor.CROSSHAIR);
+            stage.setScene(scene);
+            stage.show();
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
     public static void main(String[] args) {
         launch(args);
