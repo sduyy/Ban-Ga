@@ -11,12 +11,17 @@ public class Explosion {
         this.x = x;
         this.y = y;
     }
-
+    /*
     public void render(GraphicsContext gc) {
         gc.setFill(Color.ORANGE);
         gc.fillOval(x, y, 40, 40);
         gc.setFill(Color.YELLOW);
         gc.fillOval(x + 10, y + 10, 20, 20);
+        duration--;
+    }*/
+
+    public void render(GraphicsContext gc) {
+        gc.drawImage(Assets.explosion, x, y, 40, 40);
         duration--;
     }
 

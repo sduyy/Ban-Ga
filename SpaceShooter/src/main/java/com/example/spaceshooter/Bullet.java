@@ -22,9 +22,9 @@ public class Bullet {
     }
 
     public void render(GraphicsContext gc) {
-        gc.setFill(Color.YELLOW);
-        gc.fillRect(x, y, 5, 10);
+        gc.drawImage(Assets.bullet, x, y, 5, 10);
     }
+
 
     public double getX() { return x; }
     public double getY() { return y; }

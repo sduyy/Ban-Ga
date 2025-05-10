@@ -1,12 +1,13 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class Player {
     private double x, y;
     private boolean isHit = false;
     private long hitTime = 0;
+    private boolean blinkState = false;
+    private long lastBlinkTime = 0;
 
     public Player(double x, double y) {
         this.x = x;
@@ -48,8 +49,15 @@ public class Player {
     }
 
     public void update() {
+        // Kết thúc hiệu ứng nhấp nháy khi bị trúng đạn sau 300ms
         if (isHit && System.nanoTime() - hitTime > 300_000_000) {
             isHit = false;
+        }
+
+        // Đổi trạng thái nhấp nháy nếu HP thấp (dùng thời gian thực)
+        if (System.nanoTime() - lastBlinkTime > 200_000_000) {
+            blinkState = !blinkState;
+            lastBlinkTime = System.nanoTime();
         }
     }
 
@@ -59,13 +67,13 @@ public class Player {
     }
 
     public void render(GraphicsContext gc) {
-        if (isHit) {
-            gc.setGlobalAlpha(0.5);
-            gc.setFill(Color.RED);
-            gc.fillRect(x, y, 40, 40);
-            gc.setGlobalAlpha(1.0);
-        } else {
-            gc.drawImage(Assets.player, x, y, 40, 40);
+        boolean shouldBlink = (GameScene.lives <= 2 && blinkState) || isHit;
+
+        if (shouldBlink) {
+            gc.setGlobalAlpha(0.4); // mờ đi
         }
+
+        gc.drawImage(Assets.player, x, y, 40, 40);
+        gc.setGlobalAlpha(1.0); // reset alpha
     }
 }

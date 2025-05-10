@@ -28,8 +28,7 @@ public class Enemy {
     }
 
     public void render(GraphicsContext gc) {
-        gc.setFill(Color.RED);
-        gc.fillRect(getX(), getY(), 40, 40);
+        gc.drawImage(Assets.enemy, getX(), getY(), 40, 40);
     }
 
     public double getX() {
