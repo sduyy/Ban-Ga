@@ -11,7 +11,7 @@ public class Enemy {
     }
 
     public void update() {
-        y += 3;
+        y += 1.5; // 👈 giảm tốc độ rơi chậm hơn
     }
 
     public void render(GraphicsContext gc) {
