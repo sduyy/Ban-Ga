@@ -1,6 +1,7 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 
 public class Bullet {
     private double x, y;
@@ -13,30 +14,18 @@ public class Bullet {
 
     public boolean update() {
         y -= 10;
-        alive = y > 0;
-        return alive;
-    }
-
-    public void render(GraphicsContext gc) {
-        if (alive) {
-            gc.drawImage(Assets.bullet, x, y, 10, 20);
-        }
+        return alive && y > 0;
     }
 
     public void kill() {
         alive = false;
     }
 
-    public boolean isAlive() {
-        return alive;
+    public void render(GraphicsContext gc) {
+        gc.setFill(Color.YELLOW);
+        gc.fillRect(x, y, 5, 10);
     }
 
-    // ➕ Thêm 2 phương thức này
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
-    }
+    public double getX() { return x; }
+    public double getY() { return y; }
 }
