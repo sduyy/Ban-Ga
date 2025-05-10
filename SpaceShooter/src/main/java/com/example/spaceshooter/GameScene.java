@@ -1,5 +1,7 @@
 package com.example.spaceshooter;
 
+import java.util.ArrayList;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -10,8 +12,6 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
-
-import java.util.ArrayList;
 
 public class GameScene {
     static Player player;
@@ -34,8 +34,10 @@ public class GameScene {
     static final long SHOOT_COOLDOWN = 300_000_000;
     static long lastEnemyShot = 0;
     static final long ENEMY_SHOOT_INTERVAL = 1_500_000_000;
+    private static AnimationTimer gameLoop;
 
     public static void startGame() {
+        
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -50,8 +52,31 @@ public class GameScene {
         mediaView.setPreserveRatio(false);
 
         Pane root = new Pane(mediaView, canvas);
-        Scene scene = new Scene(root);
+        final PauseMenu[] pauseMenuRef = new PauseMenu[1];
+    
 
+        pauseMenuRef[0] = new PauseMenu(
+            () -> {
+                paused = false;
+                pauseMenuRef[0].setVisible(false);
+            },
+            () -> {
+                paused = false;
+                pauseMenuRef[0].setVisible(false);
+                resetGameState();
+
+            },
+            () -> {
+                System.out.println("Settings pressed");// đoạn này chưa có j để cài setting
+            },
+            () -> {
+                MenuScene.showMenu(Main.mainStage);
+            }
+        );
+
+        root.getChildren().add(pauseMenuRef[0]);
+        pauseMenuRef[0].setVisible(false);
+        Scene scene = new Scene(root);
         Assets.load();
         player = new Player(380, 500);
         resetGameState();
@@ -63,8 +88,14 @@ public class GameScene {
                 case UP, W -> player.move(0, -20);
                 case DOWN, S -> player.move(0, 20);
                 case SPACE -> shooting = true;
-                case ESCAPE -> paused = true;
-                case P -> paused = false;
+                case ESCAPE -> {
+                    paused = true;
+                    pauseMenuRef[0].setVisible(true);
+                }
+                case P -> {
+                    paused = false;
+                    pauseMenuRef[0].setVisible(false);
+                }
             }
         });
 
@@ -88,13 +119,13 @@ public class GameScene {
             scene.setOnMouseReleased(e -> shooting = false);
         }
 
-        new AnimationTimer() {
+        if (gameLoop != null) {
+                gameLoop.stop();
+        }
+        gameLoop = new AnimationTimer() {
             public void handle(long now) {
                 gc.clearRect(0, 0, 800, 600);
-
-                if (paused) {
-                    gc.setFill(Color.YELLOW);
-                    gc.fillText("PAUSED - Press P to resume", 300, 300);
+                if(paused) {
                     return;
                 }
 
@@ -199,7 +230,8 @@ public class GameScene {
 
                 drawHUD(gc);
             }
-        }.start();
+        };
+        gameLoop.start();
 
         Main.mainStage.setScene(scene);
         Main.mainStage.setTitle("Space Shooter");
@@ -218,6 +250,7 @@ public class GameScene {
     }
 
     private static void spawnWave(int waveNum) {
+        System.out.println("Spawn wave: " + waveNum);
         if (waveNum % 4 == 0) {
             enemies.add(new BossEnemy(350, 50, waveNum));
             return;
@@ -245,7 +278,7 @@ public class GameScene {
         }
     }
 
-    private static void resetGameState() {
+    protected static void resetGameState() {
         bullets.clear();
         enemies.clear();
         enemyBullets.clear();
@@ -258,5 +291,7 @@ public class GameScene {
         gameOver = false;
         paused = false;
         shooting = false;
+
+        player = new Player(380, 500);
     }
 }

@@ -28,7 +28,10 @@ public class MenuScene {
             toggleMouse.setText("Mouse Control: " + (Main.useMouseControl ? "ON" : "OFF"));
         });
 
-        startButton.setOnAction(e -> GameScene.startGame());
+        startButton.setOnAction(e -> {
+            GameScene.resetGameState();
+            GameScene.startGame();       
+        });
 
         VBox layout = new VBox(20, title, toggleMouse, startButton);
         layout.setAlignment(Pos.CENTER);
