@@ -31,6 +31,9 @@ public class Main extends Application {
     private static final Font FONT = Font.loadFont(Main.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20); // Font chữ bthuong.
     private static final Font TITLE_FONT = Font.loadFont(Main.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50); // Font chữ cho tên game.
 
+    private StackPane root;
+    private StackPane uiLayer; // Cái này sẽ dùng cho hiệu ứng exit.
+
     private VBox menuBox; // Cái này để các lựa chọn.
     private static int currentItem = 0; // Lựa chọn hiện tại.
 
@@ -42,22 +45,13 @@ public class Main extends Application {
      * Phần này để tạo tất cả các cái có trong menu.
      */
     private Parent createContent() {
-        StackPane root = new StackPane();
-        root.setPrefSize(1280, 720); // Resolution.
-
-        Rectangle bg = new Rectangle(1280, 720); // Background.
-        bg.setFill(Color.BLACK);
-        // Bind kích thước background theo root.
-        bg.widthProperty().bind(root.widthProperty());
-        bg.heightProperty().bind(root.heightProperty());
-
+        // Video background.
         String videoPath = getClass().getResource("/videos/space_pixel_background.mp4").toExternalForm();
         Media media = new Media(videoPath);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Lặp vô hạn
-        mediaPlayer.setMute(true); // Nếu không cần âm thanh
+        mediaPlayer.setMute(true);
         mediaPlayer.play();
-
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
@@ -66,9 +60,32 @@ public class Main extends Application {
         // Frame chứa tên game.
         ContentFrame frame1 = new ContentFrame(createMiddleContent());
 
-        // Thoát game.
+        // Lựa chọn thoát game, có hiệu ứng thoát các kiểu.
         MenuItem itemExit = new MenuItem("EXIT");
-        itemExit.setOnActivate(() -> System.exit(0));
+        itemExit.setOnActivate(() -> {
+            MenuItem thisItem = getMenuItem(currentItem);
+            thisItem.flashOnce();
+
+            // Fade out menu và title.
+            FadeTransition fadeUI = new FadeTransition(Duration.seconds(1.0), uiLayer);
+            fadeUI.setFromValue(1.0);
+            fadeUI.setToValue(0.0);
+
+            // Sau khi UI biến mất fade đen toàn màn.
+            fadeUI.setOnFinished(e -> {
+                Rectangle blackFade = new Rectangle(1280, 720, Color.BLACK);
+                blackFade.setOpacity(0);
+                root.getChildren().add(blackFade);
+
+                FadeTransition fadeToBlack = new FadeTransition(Duration.seconds(1.5), blackFade);
+                fadeToBlack.setFromValue(0);
+                fadeToBlack.setToValue(1);
+                fadeToBlack.setOnFinished(ev -> System.exit(0));
+                fadeToBlack.play();
+            });
+
+            fadeUI.play();
+        });
 
         // Menu lựa chọn.
         menuBox = new VBox(10,
@@ -82,11 +99,22 @@ public class Main extends Application {
         // Cho cái lựa chọn đầu tiên sáng.
         getMenuItem(0).setActive(true);
 
-        // Gộp frame và menuBox vào VBox để xếp dọc.
-        VBox layout = new VBox(50, frame1, menuBox); // 50 là khoảng cách giữa 2 phần.
+        // Cho tất cả căn giữa.
+        VBox layout = new VBox(50, frame1, menuBox); 
         layout.setAlignment(Pos.CENTER);
 
-        root.getChildren().addAll(mediaView, layout);
+        uiLayer = new StackPane(layout); // Gộp UI vào 1 lớp
+        uiLayer.setPickOnBounds(false);  // Cho phép video vẫn nhận tương tác
+
+        root = new StackPane(); // Gán root luôn ở đây
+        root.setPrefSize(1280, 720);
+
+        Rectangle bg = new Rectangle(1280, 720); // Background nếu cần
+        bg.setFill(Color.BLACK);
+        bg.widthProperty().bind(root.widthProperty());
+        bg.heightProperty().bind(root.heightProperty());
+
+        root.getChildren().addAll(mediaView, uiLayer); // Video ở dưới, UI ở trên
         return root;
     }
 
@@ -167,6 +195,7 @@ public class Main extends Application {
             setOnMouseClicked(e -> activate());
         }
 
+        // Hiệu ứng khi chọn.
         public void setActive(boolean b) {
             s1.setVisible(b);
             s2.setVisible(b);
@@ -206,6 +235,8 @@ public class Main extends Application {
         }
 
         public void activate() {
+            currentItem = ((VBox) getParent()).getChildren().indexOf(this);
+            flashOnce();
             if (script != null)
                 script.run();
         }
