@@ -4,7 +4,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class SuperBossEnemy extends Enemy {
-    private int hp;
     private final int maxHp;
 
     public SuperBossEnemy(double x, double y, int wave) {
@@ -12,8 +11,7 @@ public class SuperBossEnemy extends Enemy {
         this.amplitude = 120;
         this.frequency = 0.006 + wave * 0.001;
         this.canShoot = true;
-
-        this.hp = 60 + wave * 4; // Super boss khỏe hơn boss thường
+        this.hp = 60 + wave * 4;
         this.maxHp = hp;
     }
 
@@ -31,15 +29,10 @@ public class SuperBossEnemy extends Enemy {
     public void render(GraphicsContext gc) {
         double x = getX();
         double y = getY();
-
-        // Vẽ thân Super Boss
         gc.setFill(Color.DARKMAGENTA);
         gc.fillRect(x, y, 100, 100);
-
-        // Vẽ thanh máu phía trên boss
         gc.setFill(Color.RED);
         gc.fillRect(x, y - 12, 100, 10);
-
         gc.setFill(Color.LIGHTGREEN);
         gc.fillRect(x, y - 12, (hp / (double) maxHp) * 100, 10);
     }
@@ -56,8 +49,8 @@ public class SuperBossEnemy extends Enemy {
     }
 
     @Override
-    public boolean takeHit() {
-        hp--;
+    public boolean takeDamage(int damage) {
+        hp -= damage;
         return hp <= 0;
     }
 }
