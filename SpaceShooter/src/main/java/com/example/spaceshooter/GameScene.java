@@ -29,6 +29,7 @@ public class GameScene {
     static boolean gameOver = false;
     static boolean paused = false;
     static boolean shooting = false;
+    static int bossCount = 0; // Số boss đã xuất hiện
 
     static long lastShotTime = 0;
     static final long SHOOT_COOLDOWN = 300_000_000;
@@ -125,9 +126,16 @@ public class GameScene {
         gameLoop = new AnimationTimer() {
             public void handle(long now) {
                 gc.clearRect(0, 0, 800, 600);
-                if(paused) {
+
+                // ✅ Kiểm tra thắng
+                if (enemies.isEmpty() && wave == 16) {
+                    gameOver = true;
+                    gc.setFill(Color.LIME);
+                    gc.fillText("YOU WIN!", 330, 280);
                     return;
                 }
+
+                if (paused) return;
 
                 if (gameOver) {
                     if (score > highScore) {
@@ -250,17 +258,19 @@ public class GameScene {
     }
 
     private static void spawnWave(int waveNum) {
-        System.out.println("Spawn wave: " + waveNum);
-        if (waveNum % 4 == 0) {
+        if (waveNum == 16) {
+            enemies.add(new SuperBossEnemy(350, 50, waveNum));
+            return;
+        } else if (waveNum % 5 == 0) {
             enemies.add(new BossEnemy(350, 50, waveNum));
             return;
         }
 
+        // Các wave còn lại là quái thường
         switch (waveNum % 4) {
             case 1 -> {
-                for (int i = 0; i < 10; i++) {
+                for (int i = 0; i < 10; i++)
                     enemies.add(new Enemy(50 + i * 70, 100, waveNum));
-                }
             }
             case 2 -> {
                 for (int i = 0; i < 9; i++) {
@@ -273,6 +283,11 @@ public class GameScene {
                     for (int col = 0; col < 5; col++) {
                         enemies.add(new Enemy(100 + col * 100, 100 + row * 60, waveNum));
                     }
+                }
+            }
+            case 0 -> {
+                for (int i = 0; i < 10; i++) {
+                    enemies.add(new Enemy(60 + i * 70, 120 + (i % 2) * 40, waveNum));
                 }
             }
         }
