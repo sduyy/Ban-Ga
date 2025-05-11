@@ -26,10 +26,10 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 
-public class Main extends Application {
+public class StartScreen extends Application {
 
-    private static final Font FONT = Font.loadFont(Main.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20); // Font chữ bthuong.
-    private static final Font TITLE_FONT = Font.loadFont(Main.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50); // Font chữ cho tên game.
+    private static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20); // Font chữ bthuong.
+    private static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50); // Font chữ cho tên game.
 
     private StackPane root;
     private StackPane uiLayer; // Cái này sẽ dùng cho hiệu ứng exit.
@@ -134,7 +134,7 @@ public class Main extends Application {
         title.setFont(TITLE_FONT);
         title.setFill(Color.WHITE);
 
-        Text line1 = new Text("Use arrow keys to move the ship");
+        Text line1 = new Text("Use arrow keys or mouse to move the ship");
         Text line2 = new Text("SPACE or Left Click to shoot");
         Text line3 = new Text("Dodge bullets and eliminate all hostile enemies");
         Text line4 = new Text("");
