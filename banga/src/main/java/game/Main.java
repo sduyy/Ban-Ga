@@ -39,6 +39,8 @@ public class Main extends Application {
 
     private static FadeTransition blink; // Nhấp nháy.
 
+    private VBox instructionBox;
+
     private ScheduledExecutorService bgThread = Executors.newSingleThreadScheduledExecutor();
 
     /**
@@ -87,11 +89,17 @@ public class Main extends Application {
             fadeUI.play();
         });
 
+        // Hộp Instruction.
+        MenuItem instructionsItem = new MenuItem("INSTRUCTIONS");
+        instructionsItem.setOnActivate(() -> {
+            instructionBox.setVisible(true);
+        });
+
         // Menu lựa chọn.
         menuBox = new VBox(10,
                 new MenuItem("NEW GAME"),
                 new MenuItem("CONTINUE GAME"),
-                new MenuItem("INSTRUCTIONS"),
+                instructionsItem,
                 new MenuItem("CREDITS"),
                 itemExit);
         menuBox.setAlignment(Pos.CENTER);
@@ -106,15 +114,44 @@ public class Main extends Application {
         uiLayer = new StackPane(layout); // Gộp UI vào 1 lớp
         uiLayer.setPickOnBounds(false);  // Cho phép video vẫn nhận tương tác
 
-        root = new StackPane(); // Gán root luôn ở đây
+        // Root.
+        root = new StackPane();
         root.setPrefSize(1280, 720);
 
-        Rectangle bg = new Rectangle(1280, 720); // Background nếu cần
+        // Background nếu cần.
+        Rectangle bg = new Rectangle(1280, 720); 
         bg.setFill(Color.BLACK);
         bg.widthProperty().bind(root.widthProperty());
         bg.heightProperty().bind(root.heightProperty());
 
-        root.getChildren().addAll(mediaView, uiLayer); // Video ở dưới, UI ở trên
+        // Instructions
+        instructionBox = new VBox(10);
+        instructionBox.setAlignment(Pos.CENTER);
+        instructionBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
+        instructionBox.setVisible(false);
+
+        Text title = new Text("HOW TO PLAY");
+        title.setFont(TITLE_FONT);
+        title.setFill(Color.WHITE);
+
+        Text line1 = new Text("Use arrow keys to move the ship");
+        Text line2 = new Text("SPACE or Left Click to shoot");
+        Text line3 = new Text("Dodge bullets and eliminate all hostile enemies");
+        Text line4 = new Text("");
+        Text line5 = new Text("Press ESCAPE to close Instructions");
+
+        for (Text line : new Text[]{line1, line2, line3, line4, line5}) {
+            line.setFont(FONT);
+            line.setFill(Color.LIGHTGRAY);
+        }
+
+        VBox content = new VBox(10, title, line1, line2, line3, line4, line5);
+        content.setAlignment(Pos.CENTER);
+
+        instructionBox.getChildren().addAll(content);
+        uiLayer.getChildren().add(instructionBox);
+
+        root.getChildren().addAll(mediaView, uiLayer); // Video ở dưới UI ở trên
         return root;
     }
 
@@ -276,6 +313,15 @@ public class Main extends Application {
 
         // Đoạn này là dùng phím lên xuống enter để chọn lựa chọn các thứ
         scene.setOnKeyPressed(event -> {
+            // Đóng instructions
+            if (instructionBox.isVisible()) {
+                // Khi instructions đang hiện chỉ cho phép ESC.
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    instructionBox.setVisible(false);
+                }
+                return;
+            }
+
             if (event.getCode() == KeyCode.UP) {
                 if (currentItem > 0) {
                     getMenuItem(currentItem).setActive(false);
