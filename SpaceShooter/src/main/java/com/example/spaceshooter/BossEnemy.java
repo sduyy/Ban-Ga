@@ -4,7 +4,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class BossEnemy extends Enemy {
-    private int bossHP;
     private final int maxHP;
 
     public BossEnemy(double x, double y, int wave) {
@@ -12,8 +11,8 @@ public class BossEnemy extends Enemy {
         this.amplitude = 100;
         this.frequency = 0.008 + wave * 0.001;
         this.canShoot = true;
-        this.bossHP = 10 + wave * 2;
-        this.maxHP = bossHP;
+        this.hp = 10 + wave * 2;
+        this.maxHP = hp;
     }
 
     @Override
@@ -30,14 +29,11 @@ public class BossEnemy extends Enemy {
     public void render(GraphicsContext gc) {
         double x = getX();
         double y = getY();
-
         gc.drawImage(Assets.enemy, x, y, 80, 80);
-
-        // Thanh máu boss
         gc.setFill(Color.RED);
-        gc.fillRect(x, y - 10, 80, 8);  // nền
+        gc.fillRect(x, y - 10, 80, 8);
         gc.setFill(Color.LIMEGREEN);
-        gc.fillRect(x, y - 10, (bossHP / (double) maxHP) * 80, 8);  // máu còn lại
+        gc.fillRect(x, y - 10, (hp / (double) maxHP) * 80, 8);
     }
 
     @Override
@@ -52,8 +48,8 @@ public class BossEnemy extends Enemy {
     }
 
     @Override
-    public boolean takeHit() {
-        bossHP--;
-        return bossHP <= 0;
+    public boolean takeDamage(int damage) {
+        hp -= damage;
+        return hp <= 0;
     }
 }

@@ -6,6 +6,7 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
@@ -16,9 +17,9 @@ import javafx.scene.paint.Color;
 public class GameScene {
     static Player player;
     static ArrayList<Bullet> bullets = new ArrayList<>();
+    static ArrayList<Missile> missiles = new ArrayList<>();
     static ArrayList<Enemy> enemies = new ArrayList<>();
     static ArrayList<EnemyBullet> enemyBullets = new ArrayList<>();
-    static ArrayList<PowerUp> powerUps = new ArrayList<>();
     static ArrayList<Explosion> explosions = new ArrayList<>();
 
     static int score = 0;
@@ -29,7 +30,7 @@ public class GameScene {
     static boolean gameOver = false;
     static boolean paused = false;
     static boolean shooting = false;
-    static int bossCount = 0; // Số boss đã xuất hiện
+    static int bossCount = 0;
 
     static long lastShotTime = 0;
     static final long SHOOT_COOLDOWN = 300_000_000;
@@ -38,7 +39,6 @@ public class GameScene {
     private static AnimationTimer gameLoop;
 
     public static void startGame() {
-        
         Canvas canvas = new Canvas(800, 600);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -54,25 +54,23 @@ public class GameScene {
 
         Pane root = new Pane(mediaView, canvas);
         final PauseMenu[] pauseMenuRef = new PauseMenu[1];
-    
 
         pauseMenuRef[0] = new PauseMenu(
-            () -> {
-                paused = false;
-                pauseMenuRef[0].setVisible(false);
-            },
-            () -> {
-                paused = false;
-                pauseMenuRef[0].setVisible(false);
-                resetGameState();
-
-            },
-            () -> {
-                System.out.println("Settings pressed");// đoạn này chưa có j để cài setting
-            },
-            () -> {
-                MenuScene.showMenu(Main.mainStage);
-            }
+                () -> {
+                    paused = false;
+                    pauseMenuRef[0].setVisible(false);
+                },
+                () -> {
+                    paused = false;
+                    pauseMenuRef[0].setVisible(false);
+                    resetGameState();
+                },
+                () -> {
+                    System.out.println("Settings pressed");
+                },
+                () -> {
+                    MenuScene.showMenu(Main.mainStage);
+                }
         );
 
         root.getChildren().add(pauseMenuRef[0]);
@@ -89,6 +87,10 @@ public class GameScene {
                 case UP, W -> player.move(0, -20);
                 case DOWN, S -> player.move(0, 20);
                 case SPACE -> shooting = true;
+                case M -> {
+                    Missile m = player.fireMissile();
+                    if (m != null) missiles.add(m);
+                }
                 case ESCAPE -> {
                     paused = true;
                     pauseMenuRef[0].setVisible(true);
@@ -112,22 +114,22 @@ public class GameScene {
             });
 
             scene.setOnMousePressed(e -> {
-                if (e.isPrimaryButtonDown()) {
+                if (e.getButton() == MouseButton.PRIMARY) {
                     shooting = true;
+                } else if (e.getButton() == MouseButton.MIDDLE) {
+                    Missile m = player.fireMissile();
+                    if (m != null) missiles.add(m);
                 }
             });
 
             scene.setOnMouseReleased(e -> shooting = false);
         }
 
-        if (gameLoop != null) {
-                gameLoop.stop();
-        }
+        if (gameLoop != null) gameLoop.stop();
         gameLoop = new AnimationTimer() {
             public void handle(long now) {
                 gc.clearRect(0, 0, 800, 600);
 
-                // ✅ Kiểm tra thắng
                 if (enemies.isEmpty() && wave == 16) {
                     gameOver = true;
                     gc.setFill(Color.LIME);
@@ -157,6 +159,9 @@ public class GameScene {
 
                 player.update();
                 player.render(gc);
+
+                missiles.removeIf(m -> !m.update(enemies, explosions));
+                missiles.forEach(m -> m.render(gc));
 
                 bullets.removeIf(b -> !b.update());
                 bullets.forEach(b -> b.render(gc));
@@ -204,8 +209,6 @@ public class GameScene {
                                 toRemove.add(e);
                                 score += 100;
                                 explosions.add(new Explosion(e.getX(), e.getY()));
-                                if (Math.random() < 0.2)
-                                    powerUps.add(new PowerUp(e.getX(), e.getY()));
                             }
                         }
                     }
@@ -219,17 +222,6 @@ public class GameScene {
                     }
                 }
                 enemies.removeAll(toRemove);
-
-                powerUps.removeIf(p -> {
-                    p.update();
-                    p.render(gc);
-                    if (p.collidesWith(player)) {
-                        p.collect();
-                        if (lives < 5) lives++;
-                        return true;
-                    }
-                    return p.isCollected() || p.isOffScreen();
-                });
 
                 explosions.removeIf(e -> {
                     e.render(gc);
@@ -250,11 +242,13 @@ public class GameScene {
         gc.fillText("Score: " + score, 11, 21);
         gc.fillText("Lives: " + lives, 11, 41);
         gc.fillText("Wave: " + (wave - 1), 11, 61);
+        gc.fillText("Missiles: " + player.getMissileCount(), 11, 81);
 
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 10, 20);
         gc.fillText("Lives: " + lives, 10, 40);
         gc.fillText("Wave: " + (wave - 1), 10, 60);
+        gc.fillText("Missiles: " + player.getMissileCount(), 10, 80);
     }
 
     private static void spawnWave(int waveNum) {
@@ -266,7 +260,6 @@ public class GameScene {
             return;
         }
 
-        // Các wave còn lại là quái thường
         switch (waveNum % 4) {
             case 1 -> {
                 for (int i = 0; i < 10; i++)
@@ -295,9 +288,9 @@ public class GameScene {
 
     protected static void resetGameState() {
         bullets.clear();
+        missiles.clear();
         enemies.clear();
         enemyBullets.clear();
-        powerUps.clear();
         explosions.clear();
         score = 0;
         lives = 5;
@@ -306,7 +299,6 @@ public class GameScene {
         gameOver = false;
         paused = false;
         shooting = false;
-
         player = new Player(380, 500);
     }
 }

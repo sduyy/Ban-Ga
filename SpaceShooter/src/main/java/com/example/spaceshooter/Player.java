@@ -9,6 +9,8 @@ public class Player {
     private boolean blinkState = false;
     private long lastBlinkTime = 0;
 
+    private int missileCount = 3; // Số lượng tên lửa
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
@@ -48,13 +50,29 @@ public class Player {
         return new Bullet(x + 20, y);
     }
 
+    public Missile fireMissile() {
+        if (missileCount <= 0) return null;
+        missileCount--;
+        return new Missile(x + 14, y); // căn giữa máy bay
+    }
+
+    public boolean canFireMissile() {
+        return missileCount > 0;
+    }
+
+    public void addMissile(int amount) {
+        missileCount += amount;
+    }
+
+    public int getMissileCount() {
+        return missileCount;
+    }
+
     public void update() {
-        // Kết thúc hiệu ứng nhấp nháy khi bị trúng đạn sau 300ms
         if (isHit && System.nanoTime() - hitTime > 300_000_000) {
             isHit = false;
         }
 
-        // Đổi trạng thái nhấp nháy nếu HP thấp (dùng thời gian thực)
         if (System.nanoTime() - lastBlinkTime > 200_000_000) {
             blinkState = !blinkState;
             lastBlinkTime = System.nanoTime();
@@ -74,6 +92,6 @@ public class Player {
         }
 
         gc.drawImage(Assets.player, x, y, 40, 40);
-        gc.setGlobalAlpha(1.0); // reset alpha
+        gc.setGlobalAlpha(1.0);
     }
 }

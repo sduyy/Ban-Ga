@@ -1,7 +1,6 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class Enemy {
     protected double startX, baseY;
@@ -12,15 +11,15 @@ public class Enemy {
     protected int hp;
 
     public Enemy(double x, double y) {
-        this(x, y, 1); // mặc định wave 1 nếu không có thông tin
+        this(x, y, 1);
     }
 
     public Enemy(double x, double y, int wave) {
         this.startX = x;
         this.baseY = y;
         this.canShoot = true;
-        this.hp = Math.min(1 + wave / 2, 5); // wave 1–2: hp = 1, wave 3–4: hp = 2, max 5
-        this.frequency = 0.01 + Math.min(wave * 0.002, 0.03); // dao động tăng dần nhẹ
+        this.hp = Math.min(1 + wave / 2, 5); // max 5
+        this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
     }
 
     public void update() {
@@ -40,7 +39,8 @@ public class Enemy {
     }
 
     public boolean collidesWith(Bullet b) {
-        return b.getX() > getX() && b.getX() < getX() + 40 && b.getY() > getY() && b.getY() < getY() + 40;
+        return b.getX() > getX() && b.getX() < getX() + 40 &&
+                b.getY() > getY() && b.getY() < getY() + 40;
     }
 
     public boolean isShooter() {
@@ -52,7 +52,11 @@ public class Enemy {
     }
 
     public boolean takeHit() {
-        hp--;
+        return takeDamage(1);
+    }
+
+    public boolean takeDamage(int damage) {
+        hp -= damage;
         return hp <= 0;
     }
 }
