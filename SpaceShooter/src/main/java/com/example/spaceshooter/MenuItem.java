@@ -14,7 +14,7 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class MenuItem extends HBox {
-    private static final Font FONT = Font.loadFont(MenuItem.class.getResourceAsStream("Arial"), 50);
+    private static final Font FONT = Font.loadFont(MenuItem.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
     private static FadeTransition blink;
     private static int currentItem = 0;
 
