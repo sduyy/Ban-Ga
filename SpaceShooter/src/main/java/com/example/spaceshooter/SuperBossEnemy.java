@@ -29,8 +29,10 @@ public class SuperBossEnemy extends Enemy {
     public void render(GraphicsContext gc) {
         double x = getX();
         double y = getY();
+
         gc.setFill(Color.DARKMAGENTA);
         gc.fillRect(x, y, 100, 100);
+
         gc.setFill(Color.RED);
         gc.fillRect(x, y - 12, 100, 10);
         gc.setFill(Color.LIGHTGREEN);

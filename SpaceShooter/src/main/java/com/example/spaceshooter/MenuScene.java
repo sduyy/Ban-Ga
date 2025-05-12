@@ -37,7 +37,7 @@ public class MenuScene {
         layout.setAlignment(Pos.CENTER);
         layout.setStyle("-fx-background-color: black;");
 
-        Scene menuScene = new Scene(layout, 800, 600);
+        Scene menuScene = new Scene(layout, 1280, 720);
         stage.setScene(menuScene);
         stage.setTitle("Main Menu");
         stage.show();

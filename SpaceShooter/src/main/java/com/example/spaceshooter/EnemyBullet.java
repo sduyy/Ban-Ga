@@ -1,11 +1,10 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class EnemyBullet {
     private double x, y;
-    private double speed = 5;
+    private final double speed = 5;
 
     public EnemyBullet(double x, double y) {
         this.x = x;
@@ -14,7 +13,7 @@ public class EnemyBullet {
 
     public boolean update() {
         y += speed;
-        return y <= 600; // true nếu còn trên màn hình
+        return y <= 720; // Cho phép bay hết màn hình game
     }
 
     public void render(GraphicsContext gc) {

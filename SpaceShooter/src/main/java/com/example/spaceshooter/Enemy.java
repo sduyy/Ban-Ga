@@ -17,8 +17,7 @@ public class Enemy {
     public Enemy(double x, double y, int wave) {
         this.startX = x;
         this.baseY = y;
-        this.canShoot = true;
-        this.hp = Math.min(1 + wave / 2, 5); // max 5
+        this.hp = Math.min(1 + wave / 2, 5);
         this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
     }
 

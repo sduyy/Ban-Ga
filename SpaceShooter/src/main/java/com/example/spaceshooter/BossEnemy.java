@@ -30,6 +30,7 @@ public class BossEnemy extends Enemy {
         double x = getX();
         double y = getY();
         gc.drawImage(Assets.enemy, x, y, 80, 80);
+
         gc.setFill(Color.RED);
         gc.fillRect(x, y - 10, 80, 8);
         gc.setFill(Color.LIMEGREEN);

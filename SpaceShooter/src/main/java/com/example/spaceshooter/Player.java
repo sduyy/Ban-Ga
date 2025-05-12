@@ -9,7 +9,7 @@ public class Player {
     private boolean blinkState = false;
     private long lastBlinkTime = 0;
 
-    private int missileCount = 3; // Số lượng tên lửa
+    private int missileCount = 3;
 
     public Player(double x, double y) {
         this.x = x;
@@ -29,8 +29,8 @@ public class Player {
     }
 
     private void clampPosition() {
-        x = Math.max(0, Math.min(760, x));
-        y = Math.max(0, Math.min(560, y));
+        x = Math.max(0, Math.min(1240, x)); // 1280 - 40 (player width)
+        y = Math.max(0, Math.min(680, y));  // 720 - 40 (player height)
     }
 
     public boolean collidesWith(Enemy e) {
@@ -40,20 +40,21 @@ public class Player {
     }
 
     public boolean collidesWith(EnemyBullet b) {
-        return b.getX() > x && b.getX() < x + 40 && b.getY() > y && b.getY() < y + 40;
+        return b.getX() > x && b.getX() < x + 40 &&
+                b.getY() > y && b.getY() < y + 40;
     }
 
     public double getX() { return x; }
     public double getY() { return y; }
 
     public Bullet shoot() {
-        return new Bullet(x + 20, y);
+        return new Bullet(x + 17.5, y); // chỉnh lại để viên đạn khớp giữa máy bay
     }
 
     public Missile fireMissile() {
         if (missileCount <= 0) return null;
         missileCount--;
-        return new Missile(x + 14, y); // căn giữa máy bay
+        return new Missile(x + 14, y); // missile căn giữa thân máy bay
     }
 
     public boolean canFireMissile() {
@@ -88,7 +89,7 @@ public class Player {
         boolean shouldBlink = (GameScene.lives <= 2 && blinkState) || isHit;
 
         if (shouldBlink) {
-            gc.setGlobalAlpha(0.4); // mờ đi
+            gc.setGlobalAlpha(0.4);
         }
 
         gc.drawImage(Assets.player, x, y, 40, 40);

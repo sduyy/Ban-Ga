@@ -1,7 +1,6 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 
 public class Bullet {
     private double x, y;
@@ -24,7 +23,6 @@ public class Bullet {
     public void render(GraphicsContext gc) {
         gc.drawImage(Assets.bullet, x, y, 5, 10);
     }
-
 
     public double getX() { return x; }
     public double getY() { return y; }

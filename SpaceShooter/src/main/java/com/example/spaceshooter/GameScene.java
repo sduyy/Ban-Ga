@@ -39,7 +39,7 @@ public class GameScene {
     private static AnimationTimer gameLoop;
 
     public static void startGame() {
-        Canvas canvas = new Canvas(800, 600);
+        Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         Media bgMedia = new Media(GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm());
@@ -48,8 +48,8 @@ public class GameScene {
         mediaPlayer.setMute(true);
         mediaPlayer.play();
         MediaView mediaView = new MediaView(mediaPlayer);
-        mediaView.setFitWidth(800);
-        mediaView.setFitHeight(600);
+        mediaView.setFitWidth(1280);
+        mediaView.setFitHeight(720);
         mediaView.setPreserveRatio(false);
 
         Pane root = new Pane(mediaView, canvas);
@@ -77,7 +77,7 @@ public class GameScene {
         pauseMenuRef[0].setVisible(false);
         Scene scene = new Scene(root);
         Assets.load();
-        player = new Player(380, 500);
+        player = new Player(620, 640);
         resetGameState();
 
         scene.setOnKeyPressed(e -> {
@@ -128,12 +128,12 @@ public class GameScene {
         if (gameLoop != null) gameLoop.stop();
         gameLoop = new AnimationTimer() {
             public void handle(long now) {
-                gc.clearRect(0, 0, 800, 600);
+                gc.clearRect(0, 0, 1280, 720);
 
                 if (enemies.isEmpty() && wave == 16) {
                     gameOver = true;
                     gc.setFill(Color.LIME);
-                    gc.fillText("YOU WIN!", 330, 280);
+                    gc.fillText("YOU WIN!", 600, 340);
                     return;
                 }
 
@@ -145,10 +145,10 @@ public class GameScene {
                         HighScoreManager.saveHighScore(score);
                     }
                     gc.setFill(Color.RED);
-                    gc.fillText("GAME OVER", 330, 280);
+                    gc.fillText("GAME OVER", 580, 320);
                     gc.setFill(Color.WHITE);
-                    gc.fillText("Your Score: " + score, 330, 310);
-                    gc.fillText("High Score: " + highScore, 330, 330);
+                    gc.fillText("Your Score: " + score, 580, 350);
+                    gc.fillText("High Score: " + highScore, 580, 370);
                     return;
                 }
 
@@ -253,34 +253,34 @@ public class GameScene {
 
     private static void spawnWave(int waveNum) {
         if (waveNum == 16) {
-            enemies.add(new SuperBossEnemy(350, 50, waveNum));
+            enemies.add(new SuperBossEnemy(600, 50, waveNum));
             return;
         } else if (waveNum % 5 == 0) {
-            enemies.add(new BossEnemy(350, 50, waveNum));
+            enemies.add(new BossEnemy(600, 50, waveNum));
             return;
         }
 
         switch (waveNum % 4) {
             case 1 -> {
                 for (int i = 0; i < 10; i++)
-                    enemies.add(new Enemy(50 + i * 70, 100, waveNum));
+                    enemies.add(new Enemy(80 + i * 110, 100, waveNum));
             }
             case 2 -> {
                 for (int i = 0; i < 9; i++) {
                     double y = 100 + Math.abs(i - 4) * 20;
-                    enemies.add(new Enemy(80 + i * 60, y, waveNum));
+                    enemies.add(new Enemy(100 + i * 100, y, waveNum));
                 }
             }
             case 3 -> {
                 for (int row = 0; row < 2; row++) {
-                    for (int col = 0; col < 5; col++) {
-                        enemies.add(new Enemy(100 + col * 100, 100 + row * 60, waveNum));
+                    for (int col = 0; col < 6; col++) {
+                        enemies.add(new Enemy(150 + col * 150, 100 + row * 70, waveNum));
                     }
                 }
             }
             case 0 -> {
                 for (int i = 0; i < 10; i++) {
-                    enemies.add(new Enemy(60 + i * 70, 120 + (i % 2) * 40, waveNum));
+                    enemies.add(new Enemy(80 + i * 110, 150 + (i % 2) * 40, waveNum));
                 }
             }
         }
@@ -299,6 +299,6 @@ public class GameScene {
         gameOver = false;
         paused = false;
         shooting = false;
-        player = new Player(380, 500);
+        player = new Player(620, 640);
     }
 }

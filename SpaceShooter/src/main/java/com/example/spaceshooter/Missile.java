@@ -6,7 +6,7 @@ import java.util.ArrayList;
 public class Missile {
     private double x, y;
     private boolean exploded = false;
-    private final int explosionRadius = 200; // Tăng bán kính nổ
+    private final int explosionRadius = 200;
 
     public Missile(double x, double y) {
         this.x = x;
@@ -17,7 +17,7 @@ public class Missile {
         if (exploded) return false;
 
         y -= 5;
-        if (y <= 200) {
+        if (y <= 120) {
             explode(enemies, explosions);
             return false;
         }
@@ -37,13 +37,11 @@ public class Missile {
             if (dist <= explosionRadius) {
                 boolean dead;
                 if (e instanceof BossEnemy || e instanceof SuperBossEnemy) {
-                    dead = e.takeDamage(200);
+                    dead = e.takeDamage(200); // Boss giảm 200 HP
                 } else {
-                    dead = e.takeDamage(9999);
+                    dead = e.takeDamage(9999); // Quái thường chết ngay
                 }
-                if (dead) {
-                    toRemove.add(e);
-                }
+                if (dead) toRemove.add(e);
             }
         }
 
@@ -52,7 +50,7 @@ public class Missile {
 
     public void render(GraphicsContext gc) {
         if (!exploded) {
-            gc.drawImage(Assets.missile, x, y, 12, 30); // Thu nhỏ tên lửa = 3x đạn
+            gc.drawImage(Assets.missile, x, y, 12, 30); // nhỏ = 3x đạn
         }
     }
 
