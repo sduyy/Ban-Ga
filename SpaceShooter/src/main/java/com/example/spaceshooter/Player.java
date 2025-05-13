@@ -81,9 +81,8 @@ public class Player {
         return missileCount > 0;
     }
 
-    // ✅ CHỈ SỬA Ở ĐÂY: đảm bảo mỗi lần chỉ cộng đúng 1 quả khi ăn buff ROCKET
     public void addMissile(int amount) {
-        if (amount > 0) missileCount += amount;
+        missileCount += 1;
     }
 
     public int getMissileCount() {
