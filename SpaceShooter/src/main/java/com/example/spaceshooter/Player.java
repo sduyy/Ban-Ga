@@ -11,6 +11,10 @@ public class Player {
 
     private int missileCount = 3;
 
+    private int shootLevel = 1;
+    private int damageLevel = 1;
+    private int fireRateLevel = 1;
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
@@ -40,15 +44,31 @@ public class Player {
     }
 
     public boolean collidesWith(EnemyBullet b) {
-        return b.getX() > x && b.getX() < x + 40 &&
-                b.getY() > y && b.getY() < y + 40;
+        return b.getX() > x && b.getX() < x + 40 && b.getY() > y && b.getY() < y + 40;
     }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public double getX() {
+        return x;
+    }
 
-    public Bullet shoot() {
-        return new Bullet(x + 17.5, y);
+    public double getY() {
+        return y;
+    }
+
+    public Bullet[] shoot() {
+        int damage = getBulletDamage();
+        return switch (shootLevel) {
+            case 1 -> new Bullet[]{new Bullet(x + 17.5, y, damage)};
+            case 2 -> new Bullet[]{
+                    new Bullet(x + 12, y, damage),
+                    new Bullet(x + 23, y, damage)
+            };
+            default -> new Bullet[]{
+                    new Bullet(x + 10, y, damage),
+                    new Bullet(x + 17.5, y, damage),
+                    new Bullet(x + 25, y, damage)
+            };
+        };
     }
 
     public Missile fireMissile() {
@@ -61,12 +81,25 @@ public class Player {
         return missileCount > 0;
     }
 
+    // ✅ CHỈ SỬA Ở ĐÂY: đảm bảo mỗi lần chỉ cộng đúng 1 quả khi ăn buff ROCKET
     public void addMissile(int amount) {
-        missileCount += amount;
+        if (amount > 0) missileCount += amount;
     }
 
     public int getMissileCount() {
         return missileCount;
+    }
+
+    public int getShootLevel() {
+        return shootLevel;
+    }
+
+    public int getDamageLevel() {
+        return damageLevel;
+    }
+
+    public int getFireRateLevel() {
+        return fireRateLevel;
     }
 
     public void update() {
@@ -94,5 +127,33 @@ public class Player {
 
         gc.drawImage(Assets.player, x, y, 40, 40);
         gc.setGlobalAlpha(1.0);
+    }
+
+    public void upgradeShootLevel() {
+        if (shootLevel < 3) shootLevel++;
+    }
+
+    public void upgradeDamageLevel() {
+        if (damageLevel < 3) damageLevel++;
+    }
+
+    public void upgradeFireRateLevel() {
+        if (fireRateLevel < 3) fireRateLevel++;
+    }
+
+    public int getShootCooldown() {
+        return switch (fireRateLevel) {
+            case 1 -> 500;
+            case 2 -> 350;
+            default -> 250;
+        };
+    }
+
+    public int getBulletDamage() {
+        return switch (damageLevel) {
+            case 1 -> 10;
+            case 2 -> 15;
+            default -> 20;
+        };
     }
 }

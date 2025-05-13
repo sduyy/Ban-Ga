@@ -1,13 +1,11 @@
 package com.example.spaceshooter;
 
 import java.util.ArrayList;
-
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -21,6 +19,7 @@ public class GameScene {
     static ArrayList<Enemy> enemies = new ArrayList<>();
     static ArrayList<EnemyBullet> enemyBullets = new ArrayList<>();
     static ArrayList<Explosion> explosions = new ArrayList<>();
+    static ArrayList<PowerUp> powerUps = new ArrayList<>();
 
     static int score = 0;
     static int highScore = HighScoreManager.getHighScore();
@@ -30,12 +29,10 @@ public class GameScene {
     static boolean gameOver = false;
     static boolean paused = false;
     static boolean shooting = false;
-    static int bossCount = 0;
+    static boolean superBossDefeated = false;
 
     static long lastShotTime = 0;
-    static final long SHOOT_COOLDOWN = 300_000_000;
     static long lastEnemyShot = 0;
-    static final long ENEMY_SHOOT_INTERVAL = 1_500_000_000;
     private static AnimationTimer gameLoop;
 
     public static void startGame() {
@@ -43,32 +40,27 @@ public class GameScene {
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
         String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
-        Media bgMedia = new Media(videoPath);
-        MediaPlayer mediaPlayer = new MediaPlayer(bgMedia);
+        MediaPlayer mediaPlayer = new MediaPlayer(new Media(videoPath));
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         mediaPlayer.setMute(true);
-        mediaPlayer.setAutoPlay(true);
-
+        mediaPlayer.setAutoPlay(false);
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
         mediaView.setPreserveRatio(false);
 
-        Pane root = new Pane();
-        root.getChildren().addAll(mediaView, canvas);
-
-        final PauseMenu[] pauseMenuRef = new PauseMenu[1];
-        pauseMenuRef[0] = new PauseMenu(
-                () -> { paused = false; pauseMenuRef[0].setVisible(false); },
-                () -> { paused = false; pauseMenuRef[0].setVisible(false); resetGameState(); },
-                () -> { System.out.println("Settings pressed"); },
-                () -> { MenuScene.showMenu(Main.mainStage); }
+        Pane root = new Pane(mediaView, canvas);
+        PauseMenu[] pauseMenu = new PauseMenu[1];
+        pauseMenu[0] = new PauseMenu(
+                () -> paused = false,
+                () -> { paused = false; resetGameState(); },
+                () -> {},
+                () -> MenuScene.showMenu(Main.mainStage)
         );
-        root.getChildren().add(pauseMenuRef[0]);
-        pauseMenuRef[0].setVisible(false);
+        root.getChildren().add(pauseMenu[0]);
+        pauseMenu[0].setVisible(false);
 
         Scene scene = new Scene(root);
-
         Assets.load();
         player = new Player(620, 640);
         resetGameState();
@@ -86,27 +78,24 @@ public class GameScene {
                 }
                 case ESCAPE -> {
                     paused = true;
-                    pauseMenuRef[0].setVisible(true);
+                    pauseMenu[0].setVisible(true);
                 }
                 case P -> {
                     paused = false;
-                    pauseMenuRef[0].setVisible(false);
+                    pauseMenu[0].setVisible(false);
                 }
             }
         });
 
         scene.setOnKeyReleased(e -> {
-            if (e.getCode() == javafx.scene.input.KeyCode.SPACE) {
-                shooting = false;
-            }
+            if (e.getCode() == javafx.scene.input.KeyCode.SPACE) shooting = false;
         });
 
         if (Main.useMouseControl) {
             scene.setOnMouseMoved(e -> player.moveTo(e.getX() - 20, e.getY() - 20));
             scene.setOnMousePressed(e -> {
-                if (e.getButton() == MouseButton.PRIMARY) {
-                    shooting = true;
-                } else if (e.getButton() == MouseButton.MIDDLE) {
+                if (e.getButton() == MouseButton.PRIMARY) shooting = true;
+                else if (e.getButton() == MouseButton.MIDDLE) {
                     Missile m = player.fireMissile();
                     if (m != null) missiles.add(m);
                 }
@@ -114,43 +103,62 @@ public class GameScene {
             scene.setOnMouseReleased(e -> shooting = false);
         }
 
+        mediaPlayer.setOnReady(() -> {
+            mediaPlayer.play();
+            Main.mainStage.setScene(scene);
+            startGameLoop(gc);
+        });
+
+        mediaPlayer.setOnError(() -> {
+            System.err.println("Video error: " + mediaPlayer.getError());
+            Main.mainStage.setScene(scene);
+            startGameLoop(gc);
+        });
+    }
+
+    private static void startGameLoop(GraphicsContext gc) {
         if (gameLoop != null) gameLoop.stop();
 
         gameLoop = new AnimationTimer() {
             public void handle(long now) {
                 gc.clearRect(0, 0, 1280, 720);
+                if (paused) return;
 
-                if (enemies.isEmpty() && wave == 16) {
-                    gameOver = true;
+                if (wave > 17) {
+                    if (score > highScore) {
+                        HighScoreManager.saveHighScore(score);
+                        highScore = score;
+                    }
                     gc.setFill(Color.LIME);
-                    gc.fillText("YOU WIN!", 600, 340);
+                    gc.fillText("YOU WIN!", 580, 340);
+                    gc.setFill(Color.WHITE);
+                    gc.fillText("Your Score: " + score, 580, 370);
+                    gc.fillText("High Score: " + highScore, 580, 390);
                     return;
                 }
-
-                if (paused) return;
 
                 if (gameOver) {
                     if (score > highScore) {
-                        highScore = score;
                         HighScoreManager.saveHighScore(score);
+                        highScore = score;
                     }
                     gc.setFill(Color.RED);
-                    gc.fillText("GAME OVER", 580, 320);
+                    gc.fillText("GAME OVER", 580, 340);
                     gc.setFill(Color.WHITE);
-                    gc.fillText("Your Score: " + score, 580, 350);
-                    gc.fillText("High Score: " + highScore, 580, 370);
+                    gc.fillText("Your Score: " + score, 580, 370);
+                    gc.fillText("High Score: " + highScore, 580, 390);
                     return;
                 }
 
-                if (shooting && now - lastShotTime > SHOOT_COOLDOWN) {
-                    bullets.add(player.shoot());
+                if (shooting && now - lastShotTime > player.getShootCooldown() * 1_000_000L) {
+                    for (Bullet b : player.shoot()) bullets.add(b);
                     lastShotTime = now;
                 }
 
                 player.update();
                 player.render(gc);
 
-                missiles.removeIf(m -> !m.update(enemies, explosions));
+                missiles.removeIf(m -> !m.update(enemies, explosions, powerUps));
                 missiles.forEach(m -> m.render(gc));
 
                 bullets.removeIf(b -> !b.update());
@@ -160,18 +168,15 @@ public class GameScene {
                     spawnWave(wave++);
                     waveSpawned = true;
                 }
+
                 if (!enemies.isEmpty()) {
                     enemies.forEach(Enemy::update);
                     enemies.forEach(e -> e.render(gc));
-                } else {
-                    waveSpawned = false;
-                }
+                } else waveSpawned = false;
 
-                if (now - lastEnemyShot > ENEMY_SHOOT_INTERVAL) {
+                if (now - lastEnemyShot > 1_500_000_000L) {
                     for (Enemy e : enemies) {
-                        if (Math.random() < 0.2) {
-                            enemyBullets.add(e.shoot());
-                        }
+                        if (Math.random() < 0.2) enemyBullets.add(e.shoot());
                     }
                     lastEnemyShot = now;
                 }
@@ -194,21 +199,24 @@ public class GameScene {
                     for (Bullet b : bullets) {
                         if (e.collidesWith(b)) {
                             b.kill();
-                            if (e.takeHit()) {
+                            if (e.takeDamage(b.getDamage())) {
                                 toRemove.add(e);
-                                score += 100;
                                 explosions.add(new Explosion(e.getX(), e.getY()));
+                                if (e instanceof SuperBossEnemy) superBossDefeated = true;
+                                score += (e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100);
+                                dropPowerUps(e);
                             }
                         }
                     }
                     if (player.collidesWith(e)) {
                         toRemove.add(e);
                         lives--;
-                        player.markHit();
                         explosions.add(new Explosion(player.getX(), player.getY()));
+                        player.markHit();
                         if (lives <= 0) gameOver = true;
                     }
                 }
+
                 enemies.removeAll(toRemove);
 
                 explosions.removeIf(e -> {
@@ -216,13 +224,22 @@ public class GameScene {
                     return e.isFinished();
                 });
 
+                powerUps.removeIf(p -> {
+                    p.update();
+                    if (p.isExpired()) return true;
+                    p.render(gc);
+                    if (!p.isCollected() && p.collidesWith(player)) {
+                        p.collect();
+                        applyPowerUp(p.getType());
+                        return true;
+                    }
+                    return false;
+                });
+
                 drawHUD(gc);
             }
         };
         gameLoop.start();
-
-        Main.mainStage.setScene(scene);
-        Main.mainStage.setTitle("Space Shooter");
     }
 
     private static void drawHUD(GraphicsContext gc) {
@@ -231,12 +248,42 @@ public class GameScene {
         gc.fillText("Lives: " + lives, 11, 41);
         gc.fillText("Wave: " + (wave - 1), 11, 61);
         gc.fillText("Missiles: " + player.getMissileCount(), 11, 81);
-
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 10, 20);
         gc.fillText("Lives: " + lives, 10, 40);
         gc.fillText("Wave: " + (wave - 1), 10, 60);
         gc.fillText("Missiles: " + player.getMissileCount(), 10, 80);
+    }
+
+    private static void applyPowerUp(PowerUpType type) {
+        switch (type) {
+            case HEALTH -> lives = Math.min(lives + 1, 5);
+            case ROCKET -> player.addMissile(1); // ✅ +1 tên lửa
+            case AMMO -> player.upgradeShootLevel();
+            case DAMAGE -> player.upgradeDamageLevel();
+            case ENERGY -> player.upgradeFireRateLevel();
+        }
+    }
+
+    public static void dropPowerUps(Enemy e) {
+        double x = e.getX(), y = e.getY();
+        if (e instanceof BossEnemy || e instanceof SuperBossEnemy) {
+            powerUps.add(new PowerUp(x, y, PowerUpType.ROCKET));
+            if (lives < 5) powerUps.add(new PowerUp(x + 10, y, PowerUpType.HEALTH));
+            if (player.getFireRateLevel() < 3) powerUps.add(new PowerUp(x + 20, y, PowerUpType.ENERGY));
+            if (player.getShootLevel() < 3) powerUps.add(new PowerUp(x + 30, y, PowerUpType.AMMO));
+            if (player.getDamageLevel() < 3) powerUps.add(new PowerUp(x + 40, y, PowerUpType.DAMAGE));
+        } else {
+            if (Math.random() < 0.25) {
+                PowerUpType type = switch ((int) (Math.random() * 4)) {
+                    case 0 -> PowerUpType.HEALTH;
+                    case 1 -> PowerUpType.ENERGY;
+                    case 2 -> PowerUpType.AMMO;
+                    default -> PowerUpType.DAMAGE;
+                };
+                powerUps.add(new PowerUp(x, y, type));
+            }
+        }
     }
 
     private static void spawnWave(int waveNum) {
@@ -248,46 +295,20 @@ public class GameScene {
             return;
         }
 
-        switch (waveNum % 4) {
-            case 1 -> {
-                int count = 10;
-                int spacing = 70;
-                int totalWidth = (count - 1) * spacing;
-                double startX = (1280 - totalWidth - 40) / 2;
-                for (int i = 0; i < count; i++) {
-                    enemies.add(new Enemy(startX + i * spacing, 100, waveNum));
-                }
-            }
-            case 2 -> {
-                int count = 9;
-                int spacing = 80;
-                int totalWidth = (count - 1) * spacing;
-                double startX = (1280 - totalWidth - 40) / 2;
-                for (int i = 0; i < count; i++) {
-                    double y = 100 + Math.abs(i - 4) * 20;
-                    enemies.add(new Enemy(startX + i * spacing, y, waveNum));
-                }
-            }
-            case 3 -> {
-                int cols = 6;
-                int spacingX = 110;
-                int totalWidth = (cols - 1) * spacingX;
-                double startX = (1280 - totalWidth - 40) / 2;
-                for (int row = 0; row < 2; row++) {
-                    for (int col = 0; col < cols; col++) {
-                        enemies.add(new Enemy(startX + col * spacingX, 100 + row * 70, waveNum));
-                    }
-                }
-            }
-            case 0 -> {
-                int count = 10;
-                int spacing = 90;
-                int totalWidth = (count - 1) * spacing;
-                double startX = (1280 - totalWidth - 40) / 2;
-                for (int i = 0; i < count; i++) {
-                    enemies.add(new Enemy(startX + i * spacing, 150 + (i % 2) * 40, waveNum));
-                }
-            }
+        int count = switch (waveNum % 4) {
+            case 1, 0 -> 10;
+            case 2 -> 9;
+            default -> 12;
+        };
+
+        double spacing = 100;
+        double totalWidth = (count - 1) * spacing;
+        double startX = (1280 - totalWidth - 40) / 2;
+
+        for (int i = 0; i < count; i++) {
+            double x = startX + i * spacing;
+            double y = 100 + (i % 2) * 40;
+            enemies.add(new Enemy(x, y, waveNum));
         }
     }
 
@@ -297,6 +318,7 @@ public class GameScene {
         enemies.clear();
         enemyBullets.clear();
         explosions.clear();
+        powerUps.clear();
         score = 0;
         lives = 5;
         wave = 1;
@@ -304,6 +326,7 @@ public class GameScene {
         gameOver = false;
         paused = false;
         shooting = false;
+        superBossDefeated = false;
         player = new Player(620, 640);
     }
 }

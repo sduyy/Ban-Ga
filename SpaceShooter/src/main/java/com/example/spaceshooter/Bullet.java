@@ -5,10 +5,12 @@ import javafx.scene.canvas.GraphicsContext;
 public class Bullet {
     private double x, y;
     private boolean alive = true;
+    private int damage; // Thêm trường damage
 
-    public Bullet(double x, double y) {
+    public Bullet(double x, double y, int damage) { // Sửa constructor
         this.x = x;
         this.y = y;
+        this.damage = damage;
     }
 
     public boolean update() {
@@ -26,4 +28,8 @@ public class Bullet {
 
     public double getX() { return x; }
     public double getY() { return y; }
+
+    public int getDamage() { // Thêm hàm này
+        return damage;
+    }
 }

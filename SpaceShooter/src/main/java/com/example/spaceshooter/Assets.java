@@ -8,8 +8,12 @@ public class Assets {
     public static Image bullet;
     public static Image enemyBullet;
     public static Image explosion;
-    public static Image powerUp;
     public static Image missile;
+    public static Image powerUpHealth;
+    public static Image powerUpEnergy;
+    public static Image powerUpAmmo;
+    public static Image powerUpDamage;
+    public static Image powerUpRockets;
 
     public static void load() {
         player = new Image(Assets.class.getResource("/assets/images/player_ship.png").toExternalForm());
@@ -17,7 +21,11 @@ public class Assets {
         bullet = new Image(Assets.class.getResource("/assets/images/bullet.png").toExternalForm());
         enemyBullet = new Image(Assets.class.getResource("/assets/images/enemy_bullet.png").toExternalForm());
         explosion = new Image(Assets.class.getResource("/assets/images/explosion.png").toExternalForm());
-        powerUp = new Image(Assets.class.getResource("/assets/images/power_up.png").toExternalForm());
         missile = new Image(Assets.class.getResource("/assets/images/missile.png").toExternalForm());
+        powerUpHealth = new Image(Assets.class.getResource("/assets/images/Powerup_Health.png").toExternalForm());
+        powerUpEnergy = new Image(Assets.class.getResource("/assets/images/Powerup_Energy.png").toExternalForm());
+        powerUpAmmo = new Image(Assets.class.getResource("/assets/images/Powerup_Ammo.png").toExternalForm());
+        powerUpDamage = new Image(Assets.class.getResource("/assets/images/Powerup_Damage.png").toExternalForm());
+        powerUpRockets = new Image(Assets.class.getResource("/assets/images/Powerup_Rockets.png").toExternalForm());
     }
 }

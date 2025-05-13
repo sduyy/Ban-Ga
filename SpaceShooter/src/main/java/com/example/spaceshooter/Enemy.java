@@ -10,15 +10,11 @@ public class Enemy {
     protected boolean canShoot = true;
     protected int hp;
 
-    public Enemy(double x, double y) {
-        this(x, y, 1);
-    }
-
     public Enemy(double x, double y, int wave) {
         this.startX = x;
         this.baseY = y;
-        this.hp = Math.min(1 + wave / 2, 5);
         this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
+        this.hp = 10 + 2 * (wave - 1) + 2 * ((wave - 1) / 3);
     }
 
     public void update() {
@@ -29,21 +25,12 @@ public class Enemy {
         gc.drawImage(Assets.enemy, getX(), getY(), 40, 40);
     }
 
-    public double getX() {
-        return startX + Math.sin(angle) * amplitude;
-    }
-
-    public double getY() {
-        return baseY + Math.sin(angle * 2) * 10;
-    }
+    public double getX() { return startX + Math.sin(angle) * amplitude; }
+    public double getY() { return baseY + Math.sin(angle * 2) * 10; }
 
     public boolean collidesWith(Bullet b) {
         return b.getX() > getX() && b.getX() < getX() + 40 &&
                 b.getY() > getY() && b.getY() < getY() + 40;
-    }
-
-    public boolean isShooter() {
-        return canShoot;
     }
 
     public EnemyBullet shoot() {
@@ -54,8 +41,11 @@ public class Enemy {
         return takeDamage(1);
     }
 
+    // Sửa đúng hàm này để nhận damage từ đạn
     public boolean takeDamage(int damage) {
         hp -= damage;
         return hp <= 0;
     }
+
+    public boolean isShooter() { return canShoot; }
 }

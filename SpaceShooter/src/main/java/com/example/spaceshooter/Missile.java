@@ -13,18 +13,18 @@ public class Missile {
         this.y = y;
     }
 
-    public boolean update(ArrayList<Enemy> enemies, ArrayList<Explosion> explosions) {
+    public boolean update(ArrayList<Enemy> enemies, ArrayList<Explosion> explosions, ArrayList<PowerUp> powerUps) {
         if (exploded) return false;
 
         y -= 5;
         if (y <= 120) {
-            explode(enemies, explosions);
+            explode(enemies, explosions, powerUps);
             return false;
         }
         return true;
     }
 
-    private void explode(ArrayList<Enemy> enemies, ArrayList<Explosion> explosions) {
+    private void explode(ArrayList<Enemy> enemies, ArrayList<Explosion> explosions, ArrayList<PowerUp> powerUps) {
         exploded = true;
         explosions.add(new Explosion(x - explosionRadius / 2.0, y - explosionRadius / 2.0, explosionRadius));
 
@@ -36,12 +36,13 @@ public class Missile {
 
             if (dist <= explosionRadius) {
                 boolean dead;
-                if (e instanceof BossEnemy || e instanceof SuperBossEnemy) {
-                    dead = e.takeDamage(200);
-                } else {
-                    dead = e.takeDamage(9999);
+                dead = e.takeDamage(200);
+                if (dead) {
+                    toRemove.add(e);
+                    GameScene.score += (e instanceof BossEnemy) ? 500 : (e instanceof SuperBossEnemy ? 1000 : 100);
+                    explosions.add(new Explosion(e.getX(), e.getY()));
+                    GameScene.dropPowerUps(e);
                 }
-                if (dead) toRemove.add(e);
             }
         }
 
@@ -50,7 +51,7 @@ public class Missile {
 
     public void render(GraphicsContext gc) {
         if (!exploded) {
-            gc.drawImage(Assets.missile, x, y, 12, 30); // nhỏ = 3x đạn
+            gc.drawImage(Assets.missile, x, y, 12, 30);
         }
     }
 
