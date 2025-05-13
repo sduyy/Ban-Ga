@@ -37,9 +37,9 @@ public class Missile {
             if (dist <= explosionRadius) {
                 boolean dead;
                 if (e instanceof BossEnemy || e instanceof SuperBossEnemy) {
-                    dead = e.takeDamage(200); // Boss giảm 200 HP
+                    dead = e.takeDamage(200);
                 } else {
-                    dead = e.takeDamage(9999); // Quái thường chết ngay
+                    dead = e.takeDamage(9999);
                 }
                 if (dead) toRemove.add(e);
             }

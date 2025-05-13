@@ -9,7 +9,7 @@ public class Explosion {
     private int radius;
 
     public Explosion(double x, double y) {
-        this(x, y, 40); // mặc định radius
+        this(x, y, 40);
     }
 
     public Explosion(double x, double y, int radius) {

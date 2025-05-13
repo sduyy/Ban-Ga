@@ -29,8 +29,8 @@ public class Player {
     }
 
     private void clampPosition() {
-        x = Math.max(0, Math.min(1240, x)); // 1280 - 40 (player width)
-        y = Math.max(0, Math.min(680, y));  // 720 - 40 (player height)
+        x = Math.max(0, Math.min(1240, x));
+        y = Math.max(0, Math.min(680, y));
     }
 
     public boolean collidesWith(Enemy e) {
@@ -48,13 +48,13 @@ public class Player {
     public double getY() { return y; }
 
     public Bullet shoot() {
-        return new Bullet(x + 17.5, y); // chỉnh lại để viên đạn khớp giữa máy bay
+        return new Bullet(x + 17.5, y);
     }
 
     public Missile fireMissile() {
         if (missileCount <= 0) return null;
         missileCount--;
-        return new Missile(x + 14, y); // missile căn giữa thân máy bay
+        return new Missile(x + 14, y);
     }
 
     public boolean canFireMissile() {

@@ -13,7 +13,7 @@ public class EnemyBullet {
 
     public boolean update() {
         y += speed;
-        return y <= 720; // Cho phép bay hết màn hình game
+        return y <= 720;
     }
 
     public void render(GraphicsContext gc) {

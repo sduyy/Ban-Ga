@@ -12,7 +12,7 @@ public class PauseMenu extends StackPane {
 
     public PauseMenu(Runnable onResume, Runnable onRestart, Runnable onSettings, Runnable onExit) {
         setAlignment(Pos.CENTER);
-        setPrefSize(1280, 720); // kích thước mới
+        setPrefSize(1280, 720);
 
         String path = getClass().getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
         Media media = new Media(path);

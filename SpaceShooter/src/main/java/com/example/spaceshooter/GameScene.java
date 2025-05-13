@@ -42,40 +42,33 @@ public class GameScene {
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        Media bgMedia = new Media(GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm());
+        String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
+        Media bgMedia = new Media(videoPath);
         MediaPlayer mediaPlayer = new MediaPlayer(bgMedia);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         mediaPlayer.setMute(true);
-        mediaPlayer.play();
+        mediaPlayer.setAutoPlay(true);
+
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
         mediaView.setPreserveRatio(false);
 
-        Pane root = new Pane(mediaView, canvas);
+        Pane root = new Pane();
+        root.getChildren().addAll(mediaView, canvas);
+
         final PauseMenu[] pauseMenuRef = new PauseMenu[1];
-
         pauseMenuRef[0] = new PauseMenu(
-                () -> {
-                    paused = false;
-                    pauseMenuRef[0].setVisible(false);
-                },
-                () -> {
-                    paused = false;
-                    pauseMenuRef[0].setVisible(false);
-                    resetGameState();
-                },
-                () -> {
-                    System.out.println("Settings pressed");
-                },
-                () -> {
-                    MenuScene.showMenu(Main.mainStage);
-                }
+                () -> { paused = false; pauseMenuRef[0].setVisible(false); },
+                () -> { paused = false; pauseMenuRef[0].setVisible(false); resetGameState(); },
+                () -> { System.out.println("Settings pressed"); },
+                () -> { MenuScene.showMenu(Main.mainStage); }
         );
-
         root.getChildren().add(pauseMenuRef[0]);
         pauseMenuRef[0].setVisible(false);
+
         Scene scene = new Scene(root);
+
         Assets.load();
         player = new Player(620, 640);
         resetGameState();
@@ -109,10 +102,7 @@ public class GameScene {
         });
 
         if (Main.useMouseControl) {
-            scene.setOnMouseMoved((MouseEvent e) -> {
-                player.moveTo(e.getX() - 20, e.getY() - 20);
-            });
-
+            scene.setOnMouseMoved(e -> player.moveTo(e.getX() - 20, e.getY() - 20));
             scene.setOnMousePressed(e -> {
                 if (e.getButton() == MouseButton.PRIMARY) {
                     shooting = true;
@@ -121,11 +111,11 @@ public class GameScene {
                     if (m != null) missiles.add(m);
                 }
             });
-
             scene.setOnMouseReleased(e -> shooting = false);
         }
 
         if (gameLoop != null) gameLoop.stop();
+
         gameLoop = new AnimationTimer() {
             public void handle(long now) {
                 gc.clearRect(0, 0, 1280, 720);
@@ -170,7 +160,6 @@ public class GameScene {
                     spawnWave(wave++);
                     waveSpawned = true;
                 }
-
                 if (!enemies.isEmpty()) {
                     enemies.forEach(Enemy::update);
                     enemies.forEach(e -> e.render(gc));
@@ -212,7 +201,6 @@ public class GameScene {
                             }
                         }
                     }
-
                     if (player.collidesWith(e)) {
                         toRemove.add(e);
                         lives--;
@@ -253,7 +241,7 @@ public class GameScene {
 
     private static void spawnWave(int waveNum) {
         if (waveNum == 16) {
-            enemies.add(new SuperBossEnemy(600, 50, waveNum));
+            enemies.add(new SuperBossEnemy(590, 50, waveNum));
             return;
         } else if (waveNum % 5 == 0) {
             enemies.add(new BossEnemy(600, 50, waveNum));
@@ -262,25 +250,42 @@ public class GameScene {
 
         switch (waveNum % 4) {
             case 1 -> {
-                for (int i = 0; i < 10; i++)
-                    enemies.add(new Enemy(80 + i * 110, 100, waveNum));
+                int count = 10;
+                int spacing = 70;
+                int totalWidth = (count - 1) * spacing;
+                double startX = (1280 - totalWidth - 40) / 2;
+                for (int i = 0; i < count; i++) {
+                    enemies.add(new Enemy(startX + i * spacing, 100, waveNum));
+                }
             }
             case 2 -> {
-                for (int i = 0; i < 9; i++) {
+                int count = 9;
+                int spacing = 80;
+                int totalWidth = (count - 1) * spacing;
+                double startX = (1280 - totalWidth - 40) / 2;
+                for (int i = 0; i < count; i++) {
                     double y = 100 + Math.abs(i - 4) * 20;
-                    enemies.add(new Enemy(100 + i * 100, y, waveNum));
+                    enemies.add(new Enemy(startX + i * spacing, y, waveNum));
                 }
             }
             case 3 -> {
+                int cols = 6;
+                int spacingX = 110;
+                int totalWidth = (cols - 1) * spacingX;
+                double startX = (1280 - totalWidth - 40) / 2;
                 for (int row = 0; row < 2; row++) {
-                    for (int col = 0; col < 6; col++) {
-                        enemies.add(new Enemy(150 + col * 150, 100 + row * 70, waveNum));
+                    for (int col = 0; col < cols; col++) {
+                        enemies.add(new Enemy(startX + col * spacingX, 100 + row * 70, waveNum));
                     }
                 }
             }
             case 0 -> {
-                for (int i = 0; i < 10; i++) {
-                    enemies.add(new Enemy(80 + i * 110, 150 + (i % 2) * 40, waveNum));
+                int count = 10;
+                int spacing = 90;
+                int totalWidth = (count - 1) * spacing;
+                double startX = (1280 - totalWidth - 40) / 2;
+                for (int i = 0; i < count; i++) {
+                    enemies.add(new Enemy(startX + i * spacing, 150 + (i % 2) * 40, waveNum));
                 }
             }
         }
