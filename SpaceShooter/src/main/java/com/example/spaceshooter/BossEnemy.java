@@ -11,7 +11,7 @@ public class BossEnemy extends Enemy {
         this.amplitude = 100;
         this.frequency = 0.008 + wave * 0.001;
         this.canShoot = true;
-        this.hp = 10 + wave * 2;
+        this.hp = 500 + wave * 30;
         this.maxHP = hp;
     }
 

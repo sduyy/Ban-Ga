@@ -6,7 +6,7 @@ public class Enemy {
     protected double startX, baseY;
     protected double angle = 0;
     protected double amplitude = 40;
-    protected double frequency = 0.015;
+    protected double frequency = 0.02;
     protected boolean canShoot = true;
     protected int hp;
 
@@ -14,7 +14,7 @@ public class Enemy {
         this.startX = x;
         this.baseY = y;
         this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
-        this.hp = 10 + 2 * (wave - 1) + 2 * ((wave - 1) / 3);
+        this.hp = 10 + 2 * (wave - 1) + 2 * ((wave - 1) / 3) + wave * 10;
     }
 
     public void update() {
@@ -41,7 +41,6 @@ public class Enemy {
         return takeDamage(1);
     }
 
-    // Sửa đúng hàm này để nhận damage từ đạn
     public boolean takeDamage(int damage) {
         hp -= damage;
         return hp <= 0;

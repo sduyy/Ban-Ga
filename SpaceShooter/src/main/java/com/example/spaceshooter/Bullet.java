@@ -29,7 +29,7 @@ public class Bullet {
     public double getX() { return x; }
     public double getY() { return y; }
 
-    public int getDamage() { // Thêm hàm này
+    public int getDamage() {
         return damage;
     }
 }

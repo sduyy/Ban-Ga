@@ -11,7 +11,7 @@ public class SuperBossEnemy extends Enemy {
         this.amplitude = 120;
         this.frequency = 0.006 + wave * 0.001;
         this.canShoot = true;
-        this.hp = 60 + wave * 4;
+        this.hp = 1000 + wave * 35;
         this.maxHp = hp;
     }
 
