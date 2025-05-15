@@ -22,77 +22,77 @@ public class MenuItem extends HBox {
     private Text text;
     private Runnable script;
 
-        public MenuItem(String name) {
-            super(15);
-            setAlignment(Pos.CENTER);
+    public MenuItem(String name) {
+        super(15);
+        setAlignment(Pos.CENTER);
 
-            text = new Text(name);
-            text.setFont(FONT);
-            text.setEffect(new GaussianBlur(2));
+        text = new Text(name);
+        text.setFont(FONT);
+        text.setEffect(new GaussianBlur(2));
 
-            getChildren().addAll(s1, text, s2);
-            setActive(false);
-            setOnActivate(() -> System.out.println(name + " activated"));
+        getChildren().addAll(s1, text, s2);
+        setActive(false);
+        setOnActivate(() -> System.out.println(name + " activated"));
 
-            // Hover bằng chuột sáng lên.
-            setOnMouseEntered(e -> {
-                for (Node node : ((VBox) getParent()).getChildren()) {
-                    ((MenuItem) node).setActive(false);
-                }
-                setActive(true);
-                currentItem = ((VBox) getParent()).getChildren().indexOf(this);
-            });
-
-            // Click chuột.
-            setOnMouseClicked(e -> activate());
-        }
-
-        // Hiệu ứng khi chọn.
-        public void setActive(boolean b) {
-            s1.setVisible(b);
-            s2.setVisible(b);
-
-            if (b) {
-                text.setFill(Color.WHITE);
-
-                blink = new FadeTransition(Duration.seconds(1.75), text);
-                blink.setFromValue(1.0);    
-                blink.setToValue(0.7);
-                blink.setCycleCount(FadeTransition.INDEFINITE);
-                blink.setAutoReverse(true);
-                blink.play();
-            } else {
-                if (blink != null) {
-                    blink.stop();
-                    text.setOpacity(1.0);
-                }
-                text.setFill(Color.GREY);
+        // Hover bằng chuột sáng lên.
+        setOnMouseEntered(e -> {
+            for (Node node : ((VBox) getParent()).getChildren()) {
+                ((MenuItem) node).setActive(false);
             }
-        }
-
-        /**
-         * Nhấp nháy mạnh khi được chọn.
-         */
-        public void flashOnce() {
-            FadeTransition flash = new FadeTransition(Duration.seconds(0.1), text);
-            flash.setFromValue(1.0);
-            flash.setToValue(0.2);
-            flash.setCycleCount(6);
-            flash.setAutoReverse(true);
-            flash.play();
-        }
-
-        public void setOnActivate(Runnable r) {
-            script = r;
-        }
-
-        public void activate() {
+            setActive(true);
             currentItem = ((VBox) getParent()).getChildren().indexOf(this);
-            flashOnce();
-            if (script != null)
-                script.run();
+        });
+
+        // Click chuột.
+        setOnMouseClicked(e -> activate());
+    }
+
+    // Hiệu ứng khi chọn.
+    public void setActive(boolean b) {
+        s1.setVisible(b);
+        s2.setVisible(b);
+
+        if (b) {
+            text.setFill(Color.WHITE);
+
+            blink = new FadeTransition(Duration.seconds(1.75), text);
+            blink.setFromValue(1.0);    
+            blink.setToValue(0.7);
+            blink.setCycleCount(FadeTransition.INDEFINITE);
+            blink.setAutoReverse(true);
+            blink.play();
+        } else {
+            if (blink != null) {
+                blink.stop();
+                text.setOpacity(1.0);
+            }
+            text.setFill(Color.GREY);
         }
-    
+    }
+
+    /**
+     * Nhấp nháy mạnh khi được chọn.
+     */
+    public void flashOnce() {
+        FadeTransition flash = new FadeTransition(Duration.seconds(0.1), text);
+        flash.setFromValue(1.0);
+        flash.setToValue(0.2);
+        flash.setCycleCount(6);
+        flash.setAutoReverse(true);
+        flash.play();
+    }
+
+    public void setOnActivate(Runnable r) {
+        script = r;
+    }
+
+    public void activate() {
+        currentItem = ((VBox) getParent()).getChildren().indexOf(this);
+        flashOnce();
+        if (script != null)
+            script.run();
+    }
+
 
     /**
      * Hình sao bên cạnh lựa chọn.

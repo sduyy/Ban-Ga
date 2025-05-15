@@ -7,6 +7,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -52,10 +53,14 @@ public class GameScene {
         Pane root = new Pane(mediaView, canvas);
         PauseMenu[] pauseMenu = new PauseMenu[1];
         pauseMenu[0] = new PauseMenu(
-                () -> paused = false,
-                () -> { paused = false; resetGameState(); },
-                () -> {},
-                () -> MenuScene.showMenu(Main.mainStage)
+            () -> paused = false,
+            () -> { paused = false; resetGameState(); },
+            () -> {},
+            () -> {
+                paused = false;
+                Main.mainStage.getScene().setRoot(new StackPane());
+                StartScreen.showMenu(Main.mainStage);
+            }
         );
         root.getChildren().add(pauseMenu[0]);
         pauseMenu[0].setVisible(false);

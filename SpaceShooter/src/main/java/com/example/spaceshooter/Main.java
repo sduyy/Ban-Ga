@@ -10,7 +10,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) {
         mainStage = stage;
-        MenuScene.showMenu(stage);
+        StartScreen.showMenu(stage);
     }
 
     public static void main(String[] args) {
