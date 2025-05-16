@@ -1,6 +1,7 @@
 package com.example.spaceshooter;
 
 import java.util.ArrayList;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -53,8 +54,8 @@ public class GameScene {
         Pane root = new Pane(mediaView, canvas);
         PauseMenu[] pauseMenu = new PauseMenu[1];
         pauseMenu[0] = new PauseMenu(
-            () -> paused = false,
-            () -> { paused = false; resetGameState(); },
+            () -> { paused = false;pauseMenu[0].setVisible(false);},
+            () -> { paused = false; resetGameState(); pauseMenu[0].setVisible(false); },
             () -> {},
             () -> {
                 paused = false;
