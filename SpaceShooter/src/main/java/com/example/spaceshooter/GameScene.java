@@ -203,7 +203,7 @@ public class GameScene {
 
                     if (!b.update()) return true;
                     b.render(gc);
-                    if (b.collidesWith(player)) {
+                    if (player.collidesWith(b)) {
                         lives--;
                         explosions.add(new Explosion(player.getX(), player.getY()));
                         player.markHit();
@@ -331,44 +331,6 @@ public class GameScene {
             enemies.add(new Enemy(x, y, waveNum));
         }
     }
-    // code để test wave 16
-    /*private static void spawnWave(int waveNum) {
-        // Cho SuperBoss xuất hiện luôn ở wave 1 để test
-        if (waveNum == 1) {
-            enemies.add(new SuperBossEnemy(590, 50, waveNum));
-            return;
-        }
-
-        // SuperBoss chính thức ở wave 16
-        if (waveNum == 16) {
-            enemies.add(new SuperBossEnemy(590, 50, waveNum));
-            return;
-        }
-
-        // Boss thường ở wave chia hết cho 5 (ví dụ: 5, 10, 15)
-        if (waveNum % 5 == 0) {
-            enemies.add(new BossEnemy(600, 50, waveNum));
-            return;
-        }
-
-        // Quái thường cho các wave còn lại
-        int count = switch (waveNum % 4) {
-            case 1, 0 -> 10;
-            case 2 -> 9;
-            default -> 12;
-        };
-
-        double spacing = 100;
-        double totalWidth = (count - 1) * spacing;
-        double startX = (1280 - totalWidth - 40) / 2;
-
-        for (int i = 0; i < count; i++) {
-            double x = startX + i * spacing;
-            double y = 100 + (i % 2) * 40;
-            enemies.add(new Enemy(x, y, waveNum));
-        }
-    }
-    */
     protected static void resetGameState() {
         bullets.clear();
         missiles.clear();
