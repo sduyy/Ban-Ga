@@ -1,6 +1,7 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 
 public class EnemyBullet {
     private double x, y;

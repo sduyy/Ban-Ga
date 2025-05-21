@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 public class Main extends Application {
     public static boolean useMouseControl = true;
     public static Stage mainStage;
+    public static javafx.scene.media.MediaPlayer sharedMediaPlayer;
 
     @Override
     public void start(Stage stage) {

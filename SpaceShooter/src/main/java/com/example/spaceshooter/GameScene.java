@@ -13,6 +13,9 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import com.example.spaceshooter.Assets;
+import com.example.spaceshooter.SuperBossEnemy;
+
 
 public class GameScene {
     static Player player;
@@ -41,11 +44,14 @@ public class GameScene {
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
-        MediaPlayer mediaPlayer = new MediaPlayer(new Media(videoPath));
-        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-        mediaPlayer.setMute(true);
-        mediaPlayer.setAutoPlay(false);
+        if (Main.sharedMediaPlayer == null) {
+            String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
+            Main.sharedMediaPlayer = new MediaPlayer(new Media(videoPath));
+            Main.sharedMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+            Main.sharedMediaPlayer.setMute(true);
+            Main.sharedMediaPlayer.setAutoPlay(false);
+        }
+        MediaPlayer mediaPlayer = Main.sharedMediaPlayer;
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
@@ -176,18 +182,25 @@ public class GameScene {
                 }
 
                 if (!enemies.isEmpty()) {
-                    enemies.forEach(Enemy::update);
-                    enemies.forEach(e -> e.render(gc));
+                    new ArrayList<>(enemies).forEach(Enemy::update);
+                    new ArrayList<>(enemies).forEach(e -> e.render(gc));
                 } else waveSpawned = false;
 
                 if (now - lastEnemyShot > 1_500_000_000L) {
                     for (Enemy e : enemies) {
-                        if (Math.random() < 0.2) enemyBullets.add(e.shoot());
+                        if (Math.random() < 0.2) {
+                            EnemyBullet b = e.shoot();
+                            if (b != null) {
+                                enemyBullets.add(b);
+                            }
+                        }
                     }
                     lastEnemyShot = now;
                 }
 
                 enemyBullets.removeIf(b -> {
+                    if (b == null) return true;
+
                     if (!b.update()) return true;
                     b.render(gc);
                     if (b.collidesWith(player)) {
@@ -199,6 +212,7 @@ public class GameScene {
                     }
                     return false;
                 });
+
 
                 ArrayList<Enemy> toRemove = new ArrayList<>();
                 for (Enemy e : enemies) {
@@ -317,7 +331,44 @@ public class GameScene {
             enemies.add(new Enemy(x, y, waveNum));
         }
     }
+    // code để test wave 16
+    /*private static void spawnWave(int waveNum) {
+        // Cho SuperBoss xuất hiện luôn ở wave 1 để test
+        if (waveNum == 1) {
+            enemies.add(new SuperBossEnemy(590, 50, waveNum));
+            return;
+        }
 
+        // SuperBoss chính thức ở wave 16
+        if (waveNum == 16) {
+            enemies.add(new SuperBossEnemy(590, 50, waveNum));
+            return;
+        }
+
+        // Boss thường ở wave chia hết cho 5 (ví dụ: 5, 10, 15)
+        if (waveNum % 5 == 0) {
+            enemies.add(new BossEnemy(600, 50, waveNum));
+            return;
+        }
+
+        // Quái thường cho các wave còn lại
+        int count = switch (waveNum % 4) {
+            case 1, 0 -> 10;
+            case 2 -> 9;
+            default -> 12;
+        };
+
+        double spacing = 100;
+        double totalWidth = (count - 1) * spacing;
+        double startX = (1280 - totalWidth - 40) / 2;
+
+        for (int i = 0; i < count; i++) {
+            double x = startX + i * spacing;
+            double y = 100 + (i % 2) * 40;
+            enemies.add(new Enemy(x, y, waveNum));
+        }
+    }
+    */
     protected static void resetGameState() {
         bullets.clear();
         missiles.clear();
