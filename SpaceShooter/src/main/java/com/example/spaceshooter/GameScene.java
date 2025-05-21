@@ -59,9 +59,19 @@ public class GameScene {
 
         Pane root = new Pane(mediaView, canvas);
         PauseMenu[] pauseMenu = new PauseMenu[1];
+        
+        CountdownOverlay countdownOverlay = new CountdownOverlay(() -> {
+            paused = false;
+        });
+        countdownOverlay.setVisible(false);
+        root.getChildren().add(countdownOverlay);
+
         pauseMenu[0] = new PauseMenu(
-            () -> { paused = false;pauseMenu[0].setVisible(false);},
-            () -> { paused = false; resetGameState(); pauseMenu[0].setVisible(false); },
+            () -> { pauseMenu[0].setVisible(false);
+                    paused = true;
+                    countdownOverlay.start();
+                    },
+            () -> {  resetGameState(); pauseMenu[0].setVisible(false);paused = true; countdownOverlay.start();},
             () -> {},
             () -> {
                 paused = false;
