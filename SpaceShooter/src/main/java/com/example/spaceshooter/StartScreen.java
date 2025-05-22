@@ -25,7 +25,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class StartScreen {
-
     private static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
     private static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50);
 

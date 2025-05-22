@@ -40,7 +40,12 @@ public class GameScene {
     static long lastEnemyShot = 0;
     private static AnimationTimer gameLoop;
 
+    private static MusicPlayer bgMusic;
+
     public static void startGame() {
+        bgMusic = new MusicPlayer("eclipse.mp3");
+        bgMusic.play();
+
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -101,6 +106,7 @@ public class GameScene {
                 case ESCAPE -> {
                     paused = true;
                     pauseMenu[0].setVisible(true);
+                    bgMusic.pause();
                 }
                 case P -> {
                     paused = false;
