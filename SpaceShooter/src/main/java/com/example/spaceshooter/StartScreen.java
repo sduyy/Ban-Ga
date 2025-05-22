@@ -221,6 +221,8 @@ public class StartScreen {
             }
 
             if (event.getCode() == KeyCode.ENTER) {
+                SoundFX UIClick = new SoundFX("uiclick.wav");
+                UIClick.play();
                 MenuItem selected = getMenuItem(currentItem);
                 selected.flashOnce();
                 selected.activate();

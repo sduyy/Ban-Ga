@@ -15,6 +15,8 @@ public class Player {
     private int damageLevel = 1;
     private int fireRateLevel = 1;
 
+    private static final SoundFX laserSound = new SoundFX("laser.wav");
+
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
@@ -56,6 +58,7 @@ public class Player {
     }
 
     public Bullet[] shoot() {
+        laserSound.play();
         int damage = getBulletDamage();
         return switch (shootLevel) {
             case 1 -> new Bullet[]{new Bullet(x + 17.5, y, damage)};

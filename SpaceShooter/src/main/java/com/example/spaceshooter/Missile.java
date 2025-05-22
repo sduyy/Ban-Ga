@@ -8,6 +8,8 @@ public class Missile {
     private boolean exploded = false;
     private final int explosionRadius = 200;
 
+    private static final SoundFX missileExplode = new SoundFX("missile.wav");
+
     public Missile(double x, double y) {
         this.x = x;
         this.y = y;
@@ -25,6 +27,8 @@ public class Missile {
     }
 
     private void explode(ArrayList<Enemy> enemies, ArrayList<Explosion> explosions, ArrayList<PowerUp> powerUps) {
+        missileExplode.play();
+
         exploded = true;
         explosions.add(new Explosion(x - explosionRadius / 2.0, y - explosionRadius / 2.0, explosionRadius));
 
