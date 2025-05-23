@@ -1,2 +1,11 @@
 .vscode/
 .idea/
+
+SpaceShooter/target/
+SpaceShooter/.mvn/
+SpaceShooter/mvnw
+SpaceShooter/mvnw.cmd
+SpaceShooter/SpaceShooter.iml
+
+.DS_Store
+

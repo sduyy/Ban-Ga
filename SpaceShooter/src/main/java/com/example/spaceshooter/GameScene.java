@@ -40,7 +40,12 @@ public class GameScene {
     static long lastEnemyShot = 0;
     private static AnimationTimer gameLoop;
 
+    private static MusicPlayer bgMusic;
+
     public static void startGame() {
+        bgMusic = new MusicPlayer("eclipse.mp3");
+        bgMusic.play();
+
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
@@ -59,9 +64,19 @@ public class GameScene {
 
         Pane root = new Pane(mediaView, canvas);
         PauseMenu[] pauseMenu = new PauseMenu[1];
+        
+        CountdownOverlay countdownOverlay = new CountdownOverlay(() -> {
+            paused = false;
+        });
+        countdownOverlay.setVisible(false);
+        root.getChildren().add(countdownOverlay);
+
         pauseMenu[0] = new PauseMenu(
-            () -> { paused = false;pauseMenu[0].setVisible(false);},
-            () -> { paused = false; resetGameState(); pauseMenu[0].setVisible(false); },
+            () -> { pauseMenu[0].setVisible(false);
+                    paused = true;
+                    countdownOverlay.start();
+                    },
+            () -> {  resetGameState(); pauseMenu[0].setVisible(false);paused = true; countdownOverlay.start();},
             () -> {},
             () -> {
                 paused = false;
@@ -91,6 +106,7 @@ public class GameScene {
                 case ESCAPE -> {
                     paused = true;
                     pauseMenu[0].setVisible(true);
+                    bgMusic.pause();
                 }
                 case P -> {
                     paused = false;

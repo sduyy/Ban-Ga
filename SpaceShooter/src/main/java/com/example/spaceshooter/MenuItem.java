@@ -18,6 +18,8 @@ public class MenuItem extends HBox {
     private static FadeTransition blink;
     private static int currentItem = 0;
 
+    private static final SoundFX UIClick = new SoundFX("uiclick.wav");
+
     private Star s1 = new Star(), s2 = new Star();
     private Text text;
     private Runnable script;
@@ -44,7 +46,10 @@ public class MenuItem extends HBox {
         });
 
         // Click chuột.
-        setOnMouseClicked(e -> activate());
+        setOnMouseClicked(e -> {
+            UIClick.play();
+            activate();
+        });
     }
 
     // Hiệu ứng khi chọn.

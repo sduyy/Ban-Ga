@@ -25,7 +25,6 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class StartScreen {
-
     private static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
     private static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50);
 
@@ -221,6 +220,8 @@ public class StartScreen {
             }
 
             if (event.getCode() == KeyCode.ENTER) {
+                SoundFX UIClick = new SoundFX("uiclick.wav");
+                UIClick.play();
                 MenuItem selected = getMenuItem(currentItem);
                 selected.flashOnce();
                 selected.activate();
