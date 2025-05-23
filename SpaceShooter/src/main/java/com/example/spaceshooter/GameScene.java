@@ -13,6 +13,8 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
+
 import com.example.spaceshooter.Assets;
 import com.example.spaceshooter.SuperBossEnemy;
 
@@ -104,13 +106,22 @@ public class GameScene {
                     if (m != null) missiles.add(m);
                 }
                 case ESCAPE -> {
-                    paused = true;
-                    pauseMenu[0].setVisible(true);
-                    bgMusic.pause();
+                    // Cho thoát khi win hoặc lose.
+                    if (gameOver || wave > 17) {
+                        paused = false;
+                        Main.mainStage.getScene().setRoot(new StackPane());
+                        StartScreen.showMenu(Main.mainStage);
+                    } else if (!gameOver && wave <= 17 && e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
+                        paused = true;
+                        pauseMenu[0].setVisible(true);
+                        bgMusic.pause();
+                    }
                 }
                 case P -> {
-                    paused = false;
-                    pauseMenu[0].setVisible(false);
+                    if (!gameOver && wave <= 17) {
+                        paused = false;
+                        pauseMenu[0].setVisible(false);
+                    }
                 }
             }
         });
@@ -152,16 +163,22 @@ public class GameScene {
                 gc.clearRect(0, 0, 1280, 720);
                 if (paused) return;
 
+                gc.setTextAlign(TextAlignment.CENTER); // Center align all text
+
                 if (wave > 17) {
                     if (score > highScore) {
                         HighScoreManager.saveHighScore(score);
                         highScore = score;
                     }
+                    gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.LIME);
-                    gc.fillText("YOU WIN!", 580, 340);
+                    gc.fillText("YOU WIN!", 1280 / 2, 340);
+                    gc.setFont(StartScreen.FONT);
                     gc.setFill(Color.WHITE);
-                    gc.fillText("Your Score: " + score, 580, 370);
-                    gc.fillText("High Score: " + highScore, 580, 390);
+                    gc.fillText("Your Score: " + score, 1280 / 2, 400);
+                    gc.fillText("High Score: " + highScore, 1280 / 2, 440);
+                    gc.setFill(Color.LIGHTGRAY);
+                    gc.fillText("Press ESC to return to Main Menu", 1280 / 2, 500);
                     return;
                 }
 
@@ -170,13 +187,19 @@ public class GameScene {
                         HighScoreManager.saveHighScore(score);
                         highScore = score;
                     }
+                    gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.RED);
-                    gc.fillText("GAME OVER", 580, 340);
+                    gc.fillText("GAME OVER", 1280 / 2, 340);
+                    gc.setFont(StartScreen.FONT);
                     gc.setFill(Color.WHITE);
-                    gc.fillText("Your Score: " + score, 580, 370);
-                    gc.fillText("High Score: " + highScore, 580, 390);
+                    gc.fillText("Your Score: " + score, 1280 / 2, 400);
+                    gc.fillText("High Score: " + highScore, 1280 / 2, 440);
+                    gc.setFill(Color.LIGHTGRAY);
+                    gc.fillText("Press ESC to return to Main Menu", 1280 / 2, 500);
                     return;
                 }
+
+                gc.setTextAlign(TextAlignment.LEFT);
 
                 if (shooting && now - lastShotTime > player.getShootCooldown() * 1_000_000L) {
                     for (Bullet b : player.shoot()) bullets.add(b);
@@ -294,7 +317,7 @@ public class GameScene {
     private static void applyPowerUp(PowerUpType type) {
         switch (type) {
             case HEALTH -> lives = Math.min(lives + 1, 5);
-            case ROCKET -> player.addMissile(1); // ✅ +1 tên lửa
+            case ROCKET -> player.addMissile(1); // +1 tên lửa
             case AMMO -> player.upgradeShootLevel();
             case DAMAGE -> player.upgradeDamageLevel();
             case ENERGY -> player.upgradeFireRateLevel();

@@ -25,14 +25,15 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class StartScreen {
-    private static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
-    private static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50);
+    public static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
+    public static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50);
 
     private StackPane root;
     private StackPane uiLayer;
     private VBox menuBox;
     private static int currentItem = 0;
     private VBox instructionBox;
+    private VBox creditsBox;
     private ScheduledExecutorService bgThread = Executors.newSingleThreadScheduledExecutor();
 
     /**
@@ -100,12 +101,17 @@ public class StartScreen {
             instructionBox.setVisible(true);
         });
 
+        // Hộp credits.
+        MenuItem credits = new MenuItem("CREDITS");
+        credits.setOnActivate(() -> {
+            creditsBox.setVisible(true);
+        });
+
         // Menu lựa chọn.
         menuBox = new VBox(10,
                 newGame,
-                new MenuItem("CONTINUE GAME"),
                 instructionsItem,
-                new MenuItem("CREDITS"),
+                credits,
                 itemExit);
         menuBox.setAlignment(Pos.CENTER);
 
@@ -131,26 +137,53 @@ public class StartScreen {
         instructionBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
         instructionBox.setVisible(false);
 
-        Text title = new Text("HOW TO PLAY");
-        title.setFont(TITLE_FONT);
-        title.setFill(Color.WHITE);
+        Text ititle = new Text("HOW TO PLAY");
+        ititle.setFont(TITLE_FONT);
+        ititle.setFill(Color.WHITE);
 
-        Text line1 = new Text("Use arrow keys or mouse to move the ship");
-        Text line2 = new Text("SPACE or Left Click to shoot");
-        Text line3 = new Text("Dodge bullets and eliminate all hostile enemies");
-        Text line4 = new Text("");
-        Text line5 = new Text("Press ESCAPE to close Instructions");
+        Text iline1 = new Text("Use arrow keys or mouse to move the ship");
+        Text iline2 = new Text("SPACE or Left Click to shoot");
+        Text iline3 = new Text("Dodge bullets and eliminate all hostile enemies");
+        Text iline4 = new Text("");
+        Text iline5 = new Text("Press ESC to close");
 
-        for (Text line : new Text[]{line1, line2, line3, line4, line5}) {
-            line.setFont(FONT);
-            line.setFill(Color.LIGHTGRAY);
+        for (Text iline : new Text[]{iline1, iline2, iline3, iline4, iline5}) {
+            iline.setFont(FONT);
+            iline.setFill(Color.LIGHTGRAY);
         }
 
-        VBox content = new VBox(10, title, line1, line2, line3, line4, line5);
-        content.setAlignment(Pos.CENTER);
+        VBox icontent = new VBox(10, ititle, iline1, iline2, iline3, iline4, iline5);
+        icontent.setAlignment(Pos.CENTER);
 
-        instructionBox.getChildren().addAll(content);
+        instructionBox.getChildren().addAll(icontent);
         uiLayer.getChildren().add(instructionBox);
+
+        // Credits
+        creditsBox = new VBox(10);
+        creditsBox.setAlignment(Pos.CENTER);
+        creditsBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
+        creditsBox.setVisible(false);
+
+        Text ctitle = new Text("PROJECT BY");
+        ctitle.setFont(TITLE_FONT);
+        ctitle.setFill(Color.WHITE);
+
+        Text cline1 = new Text("NGUYEN VIET DUC");
+        Text cline2 = new Text("NGUYEN SON DUY");
+        Text cline3 = new Text("NGUYEN DUY HUNG");
+        Text cline4 = new Text("");
+        Text cline5 = new Text("Press ESC to close");
+
+        for (Text cline : new Text[]{cline1, cline2, cline3, cline4, cline5}) {
+            cline.setFont(FONT);
+            cline.setFill(Color.LIGHTGRAY);
+        }
+
+        VBox ccontent = new VBox(10, ctitle, cline1, cline2, cline3, cline4, cline5);
+        ccontent.setAlignment(Pos.CENTER);
+
+        creditsBox.getChildren().addAll(ccontent);
+        uiLayer.getChildren().add(creditsBox);
 
         root.getChildren().addAll(mediaView, uiLayer);
         return root;
@@ -201,6 +234,13 @@ public class StartScreen {
             if (instructionBox.isVisible()) {
                 if (event.getCode() == KeyCode.ESCAPE) {
                     instructionBox.setVisible(false);
+                }
+                return;
+            }
+
+            if (creditsBox.isVisible()) {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    creditsBox.setVisible(false);
                 }
                 return;
             }
