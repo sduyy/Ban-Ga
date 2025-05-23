@@ -37,10 +37,12 @@ public class GameScene {
     static boolean paused = false;
     static boolean shooting = false;
     static boolean superBossDefeated = false;
-
+    static boolean autoPlay = false;
     static long lastShotTime = 0;
     static long lastEnemyShot = 0;
     private static AnimationTimer gameLoop;
+    static long lastMissileTime = 0;
+    static final long missileCooldown = 500_000_000L;
 
     private static MusicPlayer bgMusic;
 
@@ -51,13 +53,12 @@ public class GameScene {
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // KHÔNG dùng sharedMediaPlayer nữa
         String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
         Media media = new Media(videoPath);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         mediaPlayer.setMute(true);
-        mediaPlayer.setAutoPlay(false); // sẽ play trong setOnReady
+        mediaPlayer.setAutoPlay(false);
 
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
@@ -88,7 +89,7 @@ public class GameScene {
                 () -> {},
                 () -> {
                     paused = false;
-                    mediaPlayer.dispose(); // dọn tài nguyên video
+                    mediaPlayer.dispose();
                     Main.mainStage.getScene().setRoot(new StackPane());
                     StartScreen.showMenu(Main.mainStage);
                 }
@@ -111,10 +112,14 @@ public class GameScene {
                     Missile m = player.fireMissile();
                     if (m != null) missiles.add(m);
                 }
+                case T -> {
+                    autoPlay = !autoPlay;
+                    System.out.println("AutoPlay: " + (autoPlay ? "ON" : "OFF"));
+                }
                 case ESCAPE -> {
                     if (gameOver || wave > 17) {
                         paused = false;
-                        mediaPlayer.dispose(); // dọn dẹp trước khi về menu
+                        mediaPlayer.dispose();
                         Main.mainStage.getScene().setRoot(new StackPane());
                         StartScreen.showMenu(Main.mainStage);
                     } else if (!gameOver && wave <= 17 && e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
@@ -131,7 +136,6 @@ public class GameScene {
                 }
             }
         });
-
         scene.setOnKeyReleased(e -> {
             if (e.getCode() == javafx.scene.input.KeyCode.SPACE) shooting = false;
         });
@@ -169,7 +173,7 @@ public class GameScene {
                 gc.clearRect(0, 0, 1280, 720);
                 if (paused) return;
 
-                gc.setTextAlign(TextAlignment.CENTER); // Center align all text
+                gc.setTextAlign(TextAlignment.CENTER);
 
                 if (wave > 17) {
                     if (score > highScore) {
@@ -214,7 +218,83 @@ public class GameScene {
 
                 player.update();
                 player.render(gc);
+                if (autoPlay && !gameOver) {
+                    if (player.getY() < 630) {
+                        player.move(0, 5);
+                    }
 
+                    PowerUp nearestBuff = powerUps.stream()
+                            .filter(p -> !p.isCollected())
+                            .min((p1, p2) -> Double.compare(
+                                    Math.abs(player.getX() - p1.getX()),
+                                    Math.abs(player.getX() - p2.getX())))
+                            .orElse(null);
+
+                    boolean interruptedByBuff = false;
+                    if (nearestBuff != null && Math.abs(nearestBuff.getY() - player.getY()) < 50) {
+                        double px = player.getX();
+                        double bx = nearestBuff.getX();
+                        if (Math.abs(px - bx) > 10) {
+                            player.move(px < bx ? 5 : -5, 0);
+                            interruptedByBuff = true;
+                        }
+                    }
+
+                    if (!interruptedByBuff) {
+                        boolean dangerLeft = false;
+                        boolean dangerRight = false;
+                        double px = player.getX();
+                        double py = player.getY();
+
+                        for (EnemyBullet b : enemyBullets) {
+                            double bx = b.getX();
+                            double by = b.getY();
+                            if (Math.abs(by - py) < 100) {
+                                if (bx < px && Math.abs(bx - px) < 60) dangerLeft = true;
+                                if (bx > px && Math.abs(bx - px) < 60) dangerRight = true;
+                            }
+                        }
+
+                        if (dangerLeft && !dangerRight && px < 1230) {
+                            player.move(20, 0);
+                        } else if (dangerRight && !dangerLeft && px > 50) {
+                            player.move(-20, 0);
+                        } else if (dangerLeft && dangerRight) {
+                            if (px > 640) player.move(-20, 0);
+                            else player.move(20, 0);
+                        }
+
+                        Enemy closest = enemies.stream()
+                                .min((e1, e2) -> Double.compare(
+                                        Math.abs(player.getX() - e1.getX()),
+                                        Math.abs(player.getX() - e2.getX())))
+                                .orElse(null);
+
+                        if (closest instanceof BossEnemy || closest instanceof SuperBossEnemy || closest instanceof MiniBossEnemy) {
+                            if (player.getMissileCount() > 0 && now - lastMissileTime > missileCooldown) {
+                                Missile m = player.fireMissile();
+                                if (m != null) {
+                                    missiles.add(m);
+                                    lastMissileTime = now;
+                                }
+                            }
+                        }
+
+                        if (closest != null) {
+                            px = player.getX();
+                            py = player.getY();
+                            double ex = closest.getX();
+                            if (Math.abs(px - ex) > 10) {
+                                player.move(px < ex ? 5 : -5, 0);
+                            }
+                        }
+
+                        if (now - lastShotTime > player.getShootCooldown() * 1_000_000L) {
+                            for (Bullet b : player.shoot()) bullets.add(b);
+                            lastShotTime = now;
+                        }
+                    }
+                }
                 missiles.removeIf(m -> !m.update(enemies, explosions, powerUps));
                 missiles.forEach(m -> m.render(gc));
 
@@ -274,14 +354,24 @@ public class GameScene {
                         }
                     }
                     if (player.collidesWith(e)) {
-                        toRemove.add(e);
                         lives--;
                         explosions.add(new Explosion(player.getX(), player.getY()));
                         player.markHit();
                         if (lives <= 0) gameOver = true;
+
+                        if (e instanceof BossEnemy || e instanceof SuperBossEnemy || e instanceof MiniBossEnemy) {
+                            if (e.takeDamage(1)) {
+                                toRemove.add(e);
+                                explosions.add(new Explosion(e.getX(), e.getY()));
+                                if (e instanceof SuperBossEnemy) superBossDefeated = true;
+                                score += (e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100);
+                                dropPowerUps(e);
+                            }
+                        } else {
+                            toRemove.add(e);
+                        }
                     }
                 }
-
                 enemies.removeAll(toRemove);
 
                 explosions.removeIf(e -> {
@@ -313,17 +403,20 @@ public class GameScene {
         gc.fillText("Lives: " + lives, 11, 41);
         gc.fillText("Wave: " + (wave - 1), 11, 61);
         gc.fillText("Missiles: " + player.getMissileCount(), 11, 81);
+        gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 11, 101);
+
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 10, 20);
         gc.fillText("Lives: " + lives, 10, 40);
         gc.fillText("Wave: " + (wave - 1), 10, 60);
         gc.fillText("Missiles: " + player.getMissileCount(), 10, 80);
+        gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 10, 100);
     }
 
     private static void applyPowerUp(PowerUpType type) {
         switch (type) {
             case HEALTH -> lives = Math.min(lives + 1, 5);
-            case ROCKET -> player.addMissile(1); // +1 tên lửa
+            case ROCKET -> player.addMissile(1);
             case AMMO -> player.upgradeShootLevel();
             case DAMAGE -> player.upgradeDamageLevel();
             case ENERGY -> player.upgradeFireRateLevel();

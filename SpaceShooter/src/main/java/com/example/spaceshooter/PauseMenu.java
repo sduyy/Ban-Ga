@@ -23,7 +23,7 @@ public class PauseMenu extends StackPane {
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
-        mediaView.setPreserveRatio(false); // phủ toàn bộ nền
+        mediaView.setPreserveRatio(false);
 
         MenuItem resumeBtn = new MenuItem("Resume");
         MenuItem restartBtn = new MenuItem("Restart");

@@ -11,7 +11,7 @@ public class MusicPlayer {
         Media media = new Media(path);
         player = new MediaPlayer(media);
         player.setCycleCount(MediaPlayer.INDEFINITE);
-        player.setVolume(0.2); // Âm lượng (0.0 -> 1.0)
+        player.setVolume(0.2);
     }
 
     public void play() {

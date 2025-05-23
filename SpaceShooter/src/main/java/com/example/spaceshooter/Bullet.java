@@ -5,9 +5,9 @@ import javafx.scene.canvas.GraphicsContext;
 public class Bullet {
     private double x, y;
     private boolean alive = true;
-    private int damage; // Thêm trường damage
+    private int damage;
 
-    public Bullet(double x, double y, int damage) { // Sửa constructor
+    public Bullet(double x, double y, int damage) {
         this.x = x;
         this.y = y;
         this.damage = damage;

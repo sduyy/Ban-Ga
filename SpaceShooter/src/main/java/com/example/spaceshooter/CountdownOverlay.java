@@ -17,7 +17,7 @@ public class CountdownOverlay extends StackPane {
     public CountdownOverlay(Runnable onFinish) {
         this.onFinish = onFinish;
         setAlignment(Pos.CENTER);
-        setPrefSize(1280, 720); // Kích thước khớp với GameScene
+        setPrefSize(1280, 720);
 
         countdownText = new Text("3");
         countdownText.setFont(Font.loadFont(getClass().getResourceAsStream("/fonts/Pixel Emulator.otf"), 150));

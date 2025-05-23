@@ -36,7 +36,6 @@ public class MenuItem extends HBox {
         setActive(false);
         setOnActivate(() -> System.out.println(name + " activated"));
 
-        // Hover bằng chuột sáng lên.
         setOnMouseEntered(e -> {
             for (Node node : ((VBox) getParent()).getChildren()) {
                 ((MenuItem) node).setActive(false);
@@ -45,14 +44,12 @@ public class MenuItem extends HBox {
             currentItem = ((VBox) getParent()).getChildren().indexOf(this);
         });
 
-        // Click chuột.
         setOnMouseClicked(e -> {
             UIClick.play();
             activate();
         });
     }
 
-    // Hiệu ứng khi chọn.
     public void setActive(boolean b) {
         s1.setVisible(b);
         s2.setVisible(b);
@@ -113,7 +110,7 @@ public class MenuItem extends HBox {
             double radiusInner = 2.5;
 
             for (int i = 0; i < 10; i++) {
-                double angle = Math.toRadians(i * 36); // 360/10 = 36
+                double angle = Math.toRadians(i * 36);
                 double radius = (i % 2 == 0) ? radiusOuter : radiusInner;
                 double x = centerX + radius * Math.cos(angle - Math.PI / 2);
                 double y = centerY + radius * Math.sin(angle - Math.PI / 2);

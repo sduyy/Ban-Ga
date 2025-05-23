@@ -9,7 +9,7 @@ public class BossEnemyBullet extends EnemyBullet {
     private final int height = 32;
 
     public BossEnemyBullet(double x, double y, double dx, double dy) {
-        super(x, y); // vẫn gọi cha nếu cần
+        super(x, y);
         this.x = x;
         this.y = y;
         this.dx = dx;
@@ -20,7 +20,7 @@ public class BossEnemyBullet extends EnemyBullet {
     public boolean update() {
         x += dx;
         y += dy;
-        return y <= 720; // hoặc bạn thay bằng giá trị màn hình thật
+        return y <= 720;
     }
 
     @Override

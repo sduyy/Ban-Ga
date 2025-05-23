@@ -5,7 +5,7 @@ import javafx.scene.paint.Color;
 
 public class BossEnemy extends Enemy {
     private final int maxHP;
-    protected int attackMode = 0; // 0 = Radial, 1 = Aimed, 2 = Strafe
+    protected int attackMode = 0;
     private long lastSkillSwitch = System.currentTimeMillis();
     private long skillCooldown = 5000;
     private long lastShotTime = 0;
@@ -18,7 +18,7 @@ public class BossEnemy extends Enemy {
         this.amplitude = 100;
         this.frequency = 0.008 + wave * 0.001;
         this.canShoot = true;
-        this.hp = (int)((500 + wave * 30) * 1.75); // tăng 25% máu so với công thức cũ
+        this.hp = (int)((500 + wave * 30) * 1.75);
         this.maxHP = hp;
     }
 

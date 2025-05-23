@@ -5,7 +5,7 @@ import javafx.scene.canvas.GraphicsContext;
 class MiniBossEnemy extends BossEnemy {
 
     public MiniBossEnemy(double x, double y, int superBossMaxHp) {
-        super(x, y, 0); // wave = 0
+        super(x, y, 0);
         this.hp = (int)(superBossMaxHp * 0.20);
         this.startX = x;
         this.baseY = y;
@@ -15,7 +15,7 @@ class MiniBossEnemy extends BossEnemy {
     public void render(GraphicsContext gc) {
         double x = getX();
         double y = getY();
-        gc.drawImage(Assets.miniBoss, x, y, 60, 60); // khác mỗi hình
+        gc.drawImage(Assets.miniBoss, x, y, 60, 60);
         gc.setFill(javafx.scene.paint.Color.RED);
         gc.fillRect(x, y - 8, 60, 6);
         gc.setFill(javafx.scene.paint.Color.LIMEGREEN);
