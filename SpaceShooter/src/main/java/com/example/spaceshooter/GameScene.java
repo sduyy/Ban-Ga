@@ -1,7 +1,7 @@
 package com.example.spaceshooter;
 
+import java.io.File;
 import java.util.ArrayList;
-
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -51,14 +51,14 @@ public class GameScene {
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        if (Main.sharedMediaPlayer == null) {
-            String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
-            Main.sharedMediaPlayer = new MediaPlayer(new Media(videoPath));
-            Main.sharedMediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
-            Main.sharedMediaPlayer.setMute(true);
-            Main.sharedMediaPlayer.setAutoPlay(false);
-        }
-        MediaPlayer mediaPlayer = Main.sharedMediaPlayer;
+        // KHÔNG dùng sharedMediaPlayer nữa
+        String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
+        Media media = new Media(videoPath);
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        mediaPlayer.setMute(true);
+        mediaPlayer.setAutoPlay(false); // sẽ play trong setOnReady
+
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
@@ -66,7 +66,7 @@ public class GameScene {
 
         Pane root = new Pane(mediaView, canvas);
         PauseMenu[] pauseMenu = new PauseMenu[1];
-        
+
         CountdownOverlay countdownOverlay = new CountdownOverlay(() -> {
             paused = false;
         });
@@ -74,24 +74,30 @@ public class GameScene {
         root.getChildren().add(countdownOverlay);
 
         pauseMenu[0] = new PauseMenu(
-            () -> { pauseMenu[0].setVisible(false);
+                () -> {
+                    pauseMenu[0].setVisible(false);
                     paused = true;
                     countdownOverlay.start();
-                    },
-            () -> {  resetGameState(); pauseMenu[0].setVisible(false);paused = true; countdownOverlay.start();},
-            () -> {},
-            () -> {
-                paused = false;
-                Main.mainStage.getScene().setRoot(new StackPane());
-                StartScreen.showMenu(Main.mainStage);
-            }
+                },
+                () -> {
+                    resetGameState();
+                    pauseMenu[0].setVisible(false);
+                    paused = true;
+                    countdownOverlay.start();
+                },
+                () -> {},
+                () -> {
+                    paused = false;
+                    mediaPlayer.dispose(); // dọn tài nguyên video
+                    Main.mainStage.getScene().setRoot(new StackPane());
+                    StartScreen.showMenu(Main.mainStage);
+                }
         );
         root.getChildren().add(pauseMenu[0]);
         pauseMenu[0].setVisible(false);
 
         Scene scene = new Scene(root);
         Assets.load();
-        player = new Player(620, 640);
         resetGameState();
 
         scene.setOnKeyPressed(e -> {
@@ -106,9 +112,9 @@ public class GameScene {
                     if (m != null) missiles.add(m);
                 }
                 case ESCAPE -> {
-                    // Cho thoát khi win hoặc lose.
                     if (gameOver || wave > 17) {
                         paused = false;
+                        mediaPlayer.dispose(); // dọn dẹp trước khi về menu
                         Main.mainStage.getScene().setRoot(new StackPane());
                         StartScreen.showMenu(Main.mainStage);
                     } else if (!gameOver && wave <= 17 && e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
