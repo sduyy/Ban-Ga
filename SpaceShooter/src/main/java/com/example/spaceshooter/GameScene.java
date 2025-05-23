@@ -323,7 +323,7 @@ public class GameScene {
     }
 
     private static void spawnWave(int waveNum) {
-        if (waveNum == 16) {
+        if (waveNum == 1) {
             enemies.add(new SuperBossEnemy(590, 50, waveNum));
             return;
         } else if (waveNum % 5 == 0) {
