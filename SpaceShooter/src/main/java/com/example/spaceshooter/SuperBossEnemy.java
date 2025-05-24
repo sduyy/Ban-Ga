@@ -11,9 +11,9 @@ public class SuperBossEnemy extends Enemy {
     private boolean[] miniBossCalled = new boolean[4];
     private int attackMode = 0;
     private long lastSkillSwitch = System.currentTimeMillis();
-    private long skillCooldown = 4500;
+    private long skillCooldown = 4000;
     private long lastShotTime = 0;
-    private long shotCooldown = 700;
+    private long shotCooldown = 500;
     private double moveSpeed = 2.5;
     private boolean enraged = false;
 
@@ -22,7 +22,7 @@ public class SuperBossEnemy extends Enemy {
         this.amplitude = 120;
         this.frequency = 0.006 + wave * 0.001;
         this.canShoot = true;
-        this.hp = (int)((500 + wave * 30) * 2.0);
+        this.hp = (int)((500 + wave * 30) * 4.0);
         this.maxHp = hp;
     }
 
@@ -35,11 +35,11 @@ public class SuperBossEnemy extends Enemy {
         angle += frequency;
         long now = System.currentTimeMillis();
 
-        if (!enraged && hp <= maxHp * 0.3) {
+        if (!enraged && hp <= maxHp * 0.5) {
             enraged = true;
-            skillCooldown = 3000;
-            shotCooldown = 400;
-            moveSpeed = 3;
+            skillCooldown = 2000;
+            shotCooldown = 300;
+            moveSpeed = 4;
         }
 
         if (now - lastSkillSwitch > skillCooldown) {

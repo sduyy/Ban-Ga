@@ -109,7 +109,6 @@ public class GameScene {
                 }
                 case T -> {
                     autoPlay = !autoPlay;
-                    System.out.println("AutoPlay: " + (autoPlay ? "ON" : "OFF"));
                 }
                 case ESCAPE -> {
                     if (gameOver || wave > 17) {
@@ -265,8 +264,10 @@ public class GameScene {
                                         Math.abs(player.getX() - e2.getX())))
                                 .orElse(null);
 
-                        if (closest instanceof BossEnemy || closest instanceof SuperBossEnemy || closest instanceof MiniBossEnemy) {
-                            if (player.getMissileCount() > 0 && now - lastMissileTime > missileCooldown) {
+                        if (wave >= 16 &&
+                                (closest instanceof BossEnemy || closest instanceof SuperBossEnemy || closest instanceof MiniBossEnemy)) {
+
+                            if (Math.abs(player.getX() - closest.getX()) < 20 && player.getMissileCount() > 0 && now - lastMissileTime > missileCooldown) {
                                 Missile m = player.fireMissile();
                                 if (m != null) {
                                     missiles.add(m);
@@ -381,6 +382,7 @@ public class GameScene {
                     if (!p.isCollected() && p.collidesWith(player)) {
                         p.collect();
                         applyPowerUp(p.getType());
+                        score += 30;
                         return true;
                     }
                     return false;
