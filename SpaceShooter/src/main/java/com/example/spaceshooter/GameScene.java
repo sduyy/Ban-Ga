@@ -264,8 +264,7 @@ public class GameScene {
                                         Math.abs(player.getX() - e2.getX())))
                                 .orElse(null);
 
-                        if (wave >= 16 &&
-                                (closest instanceof BossEnemy || closest instanceof SuperBossEnemy || closest instanceof MiniBossEnemy)) {
+                        if (wave > 16 && (closest instanceof BossEnemy || closest instanceof SuperBossEnemy || closest instanceof MiniBossEnemy)) {
 
                             if (Math.abs(player.getX() - closest.getX()) < 20 && player.getMissileCount() > 0 && now - lastMissileTime > missileCooldown) {
                                 Missile m = player.fireMissile();
