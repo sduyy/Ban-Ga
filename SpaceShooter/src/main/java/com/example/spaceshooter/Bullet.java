@@ -1,16 +1,22 @@
 package com.example.spaceshooter;
 
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
 
 public class Bullet {
     private double x, y;
     private boolean alive = true;
     private int damage;
+    private Player owner;
+    private Image image;
 
-    public Bullet(double x, double y, int damage) {
+    // Constructor dùng cho đạn có owner & sprite riêng
+    public Bullet(double x, double y, Image image, Player owner) {
         this.x = x;
         this.y = y;
-        this.damage = damage;
+        this.image = image;
+        this.owner = owner;
+        this.damage = owner.getBulletDamage(); // Gán damage từ player
     }
 
     public boolean update() {
@@ -23,13 +29,22 @@ public class Bullet {
     }
 
     public void render(GraphicsContext gc) {
-        gc.drawImage(Assets.bullet, x, y, 5, 10);
+        gc.drawImage(image, x, y, 5, 10);  // Dùng image đúng thay vì Assets.bullet cố định
     }
 
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 
     public int getDamage() {
         return damage;
+    }
+
+    public Player getOwner() {
+        return owner;
     }
 }

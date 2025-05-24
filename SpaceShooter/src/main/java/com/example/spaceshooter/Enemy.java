@@ -16,6 +16,10 @@ public class Enemy {
         this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
         this.hp = 10 + 2 * (wave - 1) + 2 * ((wave - 1) / 3) + wave * 10;
     }
+    public boolean collidesWith(Missile m) {
+        return m.getX() > getX() && m.getX() < getX() + 40 &&
+                m.getY() > getY() && m.getY() < getY() + 40;
+    }
 
     public void update() {
         angle += frequency;

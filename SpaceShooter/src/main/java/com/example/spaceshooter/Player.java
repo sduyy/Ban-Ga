@@ -1,8 +1,11 @@
 package com.example.spaceshooter;
-
+import javafx.scene.image.Image;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Player {
+    private Image sprite;
+    private int score = 0;
+    private int lives = 5; // Sửa: số mạng của người chơi
     private double x, y;
     private boolean isHit = false;
     private long hitTime = 0;
@@ -20,6 +23,12 @@ public class Player {
     public Player(double x, double y) {
         this.x = x;
         this.y = y;
+    }
+
+    public Player(double x, double y, Image sprite) {
+        this.x = x;
+        this.y = y;
+        this.sprite = sprite;
     }
 
     public void move(double dx, double dy) {
@@ -59,17 +68,16 @@ public class Player {
 
     public Bullet[] shoot() {
         laserSound.play();
-        int damage = getBulletDamage();
         return switch (shootLevel) {
-            case 1 -> new Bullet[]{new Bullet(x + 17.5, y, damage)};
+            case 1 -> new Bullet[]{new Bullet(x + 17.5, y, Assets.bullet, this)};
             case 2 -> new Bullet[]{
-                    new Bullet(x + 12, y, damage),
-                    new Bullet(x + 23, y, damage)
+                    new Bullet(x + 12, y, Assets.bullet, this),
+                    new Bullet(x + 23, y, Assets.bullet, this)
             };
             default -> new Bullet[]{
-                    new Bullet(x + 10, y, damage),
-                    new Bullet(x + 17.5, y, damage),
-                    new Bullet(x + 25, y, damage)
+                    new Bullet(x + 10, y, Assets.bullet, this),
+                    new Bullet(x + 17.5, y, Assets.bullet, this),
+                    new Bullet(x + 25, y, Assets.bullet, this)
             };
         };
     }
@@ -77,7 +85,7 @@ public class Player {
     public Missile fireMissile() {
         if (missileCount <= 0) return null;
         missileCount--;
-        return new Missile(x + 14, y);
+        return new Missile(x + 14, y, this); // 👈 truyền this vào
     }
 
     public boolean canFireMissile() {
@@ -85,7 +93,7 @@ public class Player {
     }
 
     public void addMissile(int amount) {
-        missileCount += 1;
+        missileCount += amount; // Sửa: cộng thêm số lượng tên lửa chỉ định
     }
 
     public int getMissileCount() {
@@ -121,13 +129,13 @@ public class Player {
     }
 
     public void render(GraphicsContext gc) {
-        boolean shouldBlink = (GameScene.lives <= 2 && blinkState) || isHit;
+        boolean shouldBlink = (lives <= 2 && blinkState) || isHit; // Sửa: dùng lives của đối tượng
 
         if (shouldBlink) {
             gc.setGlobalAlpha(0.4);
         }
 
-        gc.drawImage(Assets.player, x, y, 40, 40);
+        gc.drawImage(sprite, x, y, 40, 40);
         gc.setGlobalAlpha(1.0);
     }
 
@@ -158,4 +166,28 @@ public class Player {
             default -> 20;
         };
     }
+
+    public void addScore(int value) {
+        score += value;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    // Thêm phương thức get/set cho lives
+    public int getLives() {
+        return lives;
+    }
+
+    public void setLives(int lives) {
+        this.lives = lives;
+    }
+
+    public boolean collidesWith(PowerUp p) {
+        double px = p.getX();
+        double py = p.getY();
+        return x < px + 30 && x + 40 > px && y < py + 30 && y + 40 > py;
+    }
+
 }

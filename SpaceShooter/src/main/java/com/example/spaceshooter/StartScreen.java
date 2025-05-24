@@ -67,15 +67,20 @@ public class StartScreen {
         MenuItem newGame = new MenuItem("NEW GAME");
         newGame.setOnActivate(() -> {
             ChoosePlay choosePlay = new ChoosePlay(() -> {
+                GameScene.isTwoPlayerMode = false;
                 GameScene.resetGameState();
                 GameScene.startGame();
             }, () -> {
-                // phần này sẽ được làm sau.
+                GameScene.isTwoPlayerMode = true;
+                GameScene.resetGameState();
+                GameScene.startGame();
             });
-                Scene choosePlayScene = new Scene(choosePlay, 1280, 720);
-                Main.mainStage.setScene(choosePlayScene);
+
+            Scene choosePlayScene = new Scene(choosePlay, 1280, 720);
+            Main.mainStage.setScene(choosePlayScene);
         });
-        
+
+
 
         // Lựa chọn thoát game, có hiệu ứng thoát các kiểu.
         MenuItem itemExit = new MenuItem("EXIT");

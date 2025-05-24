@@ -4,6 +4,7 @@ import javafx.scene.image.Image;
 
 public class Assets {
     public static Image player;
+    public static Image player2;
     public static Image enemy;
     public static Image bullet;
     public static Image enemyBullet;
@@ -38,5 +39,6 @@ public class Assets {
         superBossEnemy = new Image(Assets.class.getResource("/assets/images/super_boss_enermy.png").toExternalForm());
         superBossBullet = new Image(Assets.class.getResource("/assets/images/Super_boss_enermy_bullet.png").toExternalForm());
         miniBoss = new Image(Assets.class.getResource("/assets/images/miniboss.png").toExternalForm());
+        player2 = new Image(Assets.class.getResource("/assets/images/player_ship_2.png").toExternalForm());
     }
 }
