@@ -1,6 +1,5 @@
 package com.example.spaceshooter;
 
-import java.io.File;
 import java.util.ArrayList;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
@@ -14,10 +13,6 @@ import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
-
-import com.example.spaceshooter.Assets;
-import com.example.spaceshooter.SuperBossEnemy;
-
 
 public class GameScene {
     static Player player;
@@ -125,7 +120,6 @@ public class GameScene {
                     } else if (!gameOver && wave <= 17 && e.getCode() == javafx.scene.input.KeyCode.ESCAPE) {
                         paused = true;
                         pauseMenu[0].setVisible(true);
-                        bgMusic.pause();
                     }
                 }
                 case P -> {
@@ -197,6 +191,7 @@ public class GameScene {
                         HighScoreManager.saveHighScore(score);
                         highScore = score;
                     }
+                    bgMusic.stop();
                     gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.RED);
                     gc.fillText("GAME OVER", 1280 / 2, 340);

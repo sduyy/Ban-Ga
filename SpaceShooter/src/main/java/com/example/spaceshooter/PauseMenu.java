@@ -27,17 +27,15 @@ public class PauseMenu extends StackPane {
 
         MenuItem resumeBtn = new MenuItem("Resume");
         MenuItem restartBtn = new MenuItem("Restart");
-        MenuItem settingsBtn = new MenuItem("Settings");
         MenuItem exitBtn = new MenuItem("Exit to Menu");
 
         menuItems = new VBox(10);
         menuItems.setAlignment(Pos.CENTER);
-        menuItems.getChildren().addAll(resumeBtn, restartBtn, settingsBtn, exitBtn);
+        menuItems.getChildren().addAll(resumeBtn, restartBtn, exitBtn);
         getMenuItem(0).setActive(true);
 
         resumeBtn.setOnActivate(onResume);
         restartBtn.setOnActivate(onRestart);
-        settingsBtn.setOnActivate(onSettings);
         exitBtn.setOnActivate(onExit);
 
         getChildren().addAll(mediaView, menuItems);
