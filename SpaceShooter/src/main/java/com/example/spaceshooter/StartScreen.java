@@ -66,9 +66,16 @@ public class StartScreen {
 
         MenuItem newGame = new MenuItem("NEW GAME");
         newGame.setOnActivate(() -> {
-            GameScene.resetGameState();
-            GameScene.startGame();       
+            ChoosePlay choosePlay = new ChoosePlay(() -> {
+                GameScene.resetGameState();
+                GameScene.startGame();
+            }, () -> {
+                // phần này sẽ được làm sau.
+            });
+                Scene choosePlayScene = new Scene(choosePlay, 1280, 720);
+                Main.mainStage.setScene(choosePlayScene);
         });
+        
 
         // Lựa chọn thoát game, có hiệu ứng thoát các kiểu.
         MenuItem itemExit = new MenuItem("EXIT");
