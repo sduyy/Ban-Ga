@@ -3,6 +3,8 @@ package com.example.spaceshooter;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Enemy {
+    private static final SoundFX explodeSound = new SoundFX("shipexplode.mp3");
+
     protected double startX, baseY;
     protected double angle = 0;
     protected double amplitude = 40;
@@ -47,6 +49,10 @@ public class Enemy {
 
     public boolean takeDamage(int damage) {
         hp -= damage;
+        if (hp <= 0) {
+            explodeSound.play();
+            return true;
+        }
         return hp <= 0;
     }
 

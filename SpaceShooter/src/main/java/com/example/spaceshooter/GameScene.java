@@ -1,6 +1,7 @@
 package com.example.spaceshooter;
 
 import java.util.ArrayList;
+
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -12,6 +13,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 public class GameScene {
@@ -45,6 +47,8 @@ public class GameScene {
     static final long missileCooldown = 500_000_000L;
 
     private static MusicPlayer bgMusic;
+    private static final SoundFX powerupSound = new SoundFX("powerup.wav");
+    private static final SoundFX hitSound = new SoundFX("shipexplode.mp3");
 
     public static void startGame() {
         bgMusic = new MusicPlayer("eclipse.mp3");
@@ -53,7 +57,7 @@ public class GameScene {
         Canvas canvas = new Canvas(1280, 720);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        String videoPath = GameScene.class.getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
+        String videoPath = GameScene.class.getResource("/assets/video/bgspedup4.mp4").toExternalForm();
         Media media = new Media(videoPath);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
@@ -85,11 +89,13 @@ public class GameScene {
                     pauseMenu[0].setVisible(false);
                     paused = true;
                     countdownOverlay.start();
+                    if (bgMusic != null) bgMusic.play();
                 },
                 () -> {},
                 () -> {
                     paused = false;
                     mediaPlayer.dispose();
+                    if (bgMusic != null) bgMusic.stop();
                     Main.mainStage.getScene().setRoot(new StackPane());
                     StartScreen.showMenu(Main.mainStage);
                 }
@@ -133,6 +139,7 @@ public class GameScene {
                     if (gameOver || wave > 17) {
                         paused = false;
                         mediaPlayer.dispose();
+                        if (bgMusic != null) bgMusic.stop();
                         Main.mainStage.getScene().setRoot(new StackPane());
                         StartScreen.showMenu(Main.mainStage);
                     } else {
@@ -195,6 +202,7 @@ public class GameScene {
                         HighScoreManager.saveHighScore(player.getScore());
                         highScore = player.getScore();
                     }
+                    if (bgMusic != null) bgMusic.stop();
                     gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.LIME);
                     gc.fillText("YOU WIN!", 1280 / 2, 340);
@@ -212,7 +220,7 @@ public class GameScene {
                         HighScoreManager.saveHighScore(player.getScore());
                         highScore = player.getScore();
                     }
-                    bgMusic.stop();
+                    if (bgMusic != null) bgMusic.stop();
                     gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.RED);
                     gc.fillText("GAME OVER", 1280 / 2, 340);
@@ -474,11 +482,13 @@ public class GameScene {
 
                     if (!p.isCollected()) {
                         if (player.collidesWith(p)) {
+                            powerupSound.play();
                             p.collect();
                             applyPowerUpToPlayer(player, p.getType());
                             player.addScore(30); // Sửa: cộng điểm cho player1 nhặt vật phẩm
                             return true;
                         } else if (isTwoPlayerMode && player2 != null && player2.collidesWith(p)) {
+                            powerupSound.play();
                             p.collect();
                             applyPowerUpToPlayer(player2, p.getType());
                             player2.addScore(30);
@@ -496,58 +506,57 @@ public class GameScene {
     }
 
     private static void drawHUD(GraphicsContext gc) {
+        gc.setFont(Font.font(StartScreen.FONT.getFamily(), 13));
         gc.setFill(Color.BLACK);
 
         if (!isTwoPlayerMode) {
-            // HUD chế độ 1 người
-            gc.fillText("Score: " + player.getScore(), 11, 21);
-            gc.fillText("Lives: " + player.getLives(), 11, 41);
-            gc.fillText("Wave: " + (wave - 1), 11, 61);
-            gc.fillText("Missiles: " + player.getMissileCount(), 11, 81);
-            gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 11, 101);
-        } else {
-            // HUD chế độ 2 người
+            gc.fillText("Score: " + player.getScore(), 11, 18);
+            gc.fillText("Lives: " + player.getLives(), 11, 34);
+            gc.fillText("Missiles: " + player.getMissileCount(), 11, 50);
+            gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 11, 66);
 
-            // Góc trái: Player 1
-            gc.fillText("P1 Score: " + player.getScore(), 11, 21);
-            gc.fillText("P1 Lives: " + player.getLives(), 11, 41);
-            gc.fillText("P1 Missiles: " + player.getMissileCount(), 11, 61);
-
-            // Giữa: Wave
             gc.setTextAlign(TextAlignment.CENTER);
-            gc.fillText("Wave " + (wave - 1), 1280 / 2, 21);
+            gc.fillText("Wave: " + (wave - 1), 1280 / 2, 18);
+            gc.setTextAlign(TextAlignment.LEFT);
+        } else {
+
+            // 2 players HUD
+            gc.fillText("P1 Score: " + player.getScore(), 11, 18);
+            gc.fillText("P1 Lives: " + player.getLives(), 11, 34);
+            gc.fillText("P1 Missiles: " + player.getMissileCount(), 11, 50);
+
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.fillText("Wave: " + (wave - 1), 1280 / 2, 18);
             gc.setTextAlign(TextAlignment.LEFT);
 
-            // Góc phải: Player 2
-            gc.fillText("P2 Score: " + player2.getScore(), 1050, 21);
-            gc.fillText("P2 Lives: " + player2.getLives(), 1050, 41);
-            gc.fillText("P2 Missiles: " + player2.getMissileCount(), 1050, 61);
+            gc.fillText("P2 Score: " + player2.getScore(), 1050, 18);
+            gc.fillText("P2 Lives: " + player2.getLives(), 1050, 34);
+            gc.fillText("P2 Missiles: " + player2.getMissileCount(), 1050, 50);
         }
 
-        // Chữ trắng đè lên để tạo độ nét
         gc.setFill(Color.WHITE);
 
         if (!isTwoPlayerMode) {
-            gc.fillText("Score: " + player.getScore(), 10, 20);
-            gc.fillText("Lives: " + player.getLives(), 10, 40);
-            gc.fillText("Wave: " + (wave - 1), 10, 60);
-            gc.fillText("Missiles: " + player.getMissileCount(), 10, 80);
-            gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 10, 100);
-        } else {
-            // Player 1
-            gc.fillText("P1 Score: " + player.getScore(), 10, 20);
-            gc.fillText("P1 Lives: " + player.getLives(), 10, 40);
-            gc.fillText("P1 Missiles: " + player.getMissileCount(), 10, 60);
+            gc.fillText("Score: " + player.getScore(), 10, 17);
+            gc.fillText("Lives: " + player.getLives(), 10, 33);
+            gc.fillText("Missiles: " + player.getMissileCount(), 10, 49);
+            gc.fillText("AI: " + (autoPlay ? "ON" : "OFF"), 10, 65);
 
-            // Wave
             gc.setTextAlign(TextAlignment.CENTER);
-            gc.fillText("Wave " + (wave - 1), 1280 / 2 - 1, 20);
+            gc.fillText("Wave: " + (wave - 1), 1280 / 2, 17);
+            gc.setTextAlign(TextAlignment.LEFT);
+        } else {
+            gc.fillText("P1 Score: " + player.getScore(), 10, 17);
+            gc.fillText("P1 Lives: " + player.getLives(), 10, 33);
+            gc.fillText("P1 Missiles: " + player.getMissileCount(), 10, 49);
+
+            gc.setTextAlign(TextAlignment.CENTER);
+            gc.fillText("Wave: " + (wave - 1), 1280 / 2, 17);
             gc.setTextAlign(TextAlignment.LEFT);
 
-            // Player 2
-            gc.fillText("P2 Score: " + player2.getScore(), 1049, 20);
-            gc.fillText("P2 Lives: " + player2.getLives(), 1049, 40);
-            gc.fillText("P2 Missiles: " + player2.getMissileCount(), 1049, 60);
+            gc.fillText("P2 Score: " + player2.getScore(), 1049, 17);
+            gc.fillText("P2 Lives: " + player2.getLives(), 1049, 33);
+            gc.fillText("P2 Missiles: " + player2.getMissileCount(), 1049, 49);
         }
     }
 

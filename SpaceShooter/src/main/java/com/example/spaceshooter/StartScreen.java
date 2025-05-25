@@ -149,22 +149,28 @@ public class StartScreen {
         instructionBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
         instructionBox.setVisible(false);
 
-        Text ititle = new Text("HOW TO PLAY");
+        Text ititle = new Text(" HOW TO PLAY");
         ititle.setFont(TITLE_FONT);
         ititle.setFill(Color.WHITE);
 
-        Text iline1 = new Text("Use arrow keys or mouse to move the ship");
-        Text iline2 = new Text("SPACE or Left Click to shoot");
-        Text iline3 = new Text("Dodge bullets and eliminate all hostile enemies");
+        Text iline1 = new Text("1 Player");
+        Text iline2 = new Text("Move: WASD or Mouse");
+        Text iline3 = new Text("Shoot: SPACE or Left Click, Missile: M or Middle Click");
         Text iline4 = new Text("");
-        Text iline5 = new Text("Press ESC to close");
+        Text iline5 = new Text("2 Players");
+        Text iline6 = new Text("Move: P1: WASD - P2: Arrow Keys");
+        Text iline7 = new Text("Shoot, Missile: P1: Space, M - P2: ENTER, SHIFT");
+        Text iline8 = new Text("");
+        Text iline9 = new Text("Dodge bullets and eliminate all enemies");
+        Text iline10 = new Text("");
+        Text iline11 = new Text("Press ESC to close");
 
-        for (Text iline : new Text[]{iline1, iline2, iline3, iline4, iline5}) {
+        for (Text iline : new Text[]{iline1, iline2, iline3, iline4, iline5, iline6, iline7, iline8, iline9, iline10, iline11}) {
             iline.setFont(FONT);
             iline.setFill(Color.LIGHTGRAY);
         }
 
-        VBox icontent = new VBox(10, ititle, iline1, iline2, iline3, iline4, iline5);
+        VBox icontent = new VBox(10, ititle, iline1, iline2, iline3, iline4, iline5, iline6, iline7, iline8, iline9, iline10, iline11);
         icontent.setAlignment(Pos.CENTER);
 
         instructionBox.getChildren().addAll(icontent);

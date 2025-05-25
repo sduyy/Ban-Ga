@@ -4,6 +4,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class BossEnemy extends Enemy {
+    private static final SoundFX explodeSound = new SoundFX("missile.wav");
+    
     private final int maxHP;
     protected int attackMode = 0;
     private long lastSkillSwitch = System.currentTimeMillis();
@@ -83,6 +85,10 @@ public class BossEnemy extends Enemy {
     @Override
     public boolean takeDamage(int damage) {
         hp -= damage;
+        if (hp <= 0) {
+            explodeSound.play();
+            return true;
+        }
         return hp <= 0;
     }
 

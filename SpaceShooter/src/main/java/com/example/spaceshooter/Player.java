@@ -19,6 +19,7 @@ public class Player {
     private int fireRateLevel = 1;
 
     private static final SoundFX laserSound = new SoundFX("laser.wav");
+    private static final SoundFX hitSound = new SoundFX("shipexplode.mp3");
 
     public Player(double x, double y) {
         this.x = x;
@@ -124,6 +125,7 @@ public class Player {
     }
 
     public void markHit() {
+        hitSound.play();
         isHit = true;
         hitTime = System.nanoTime();
     }
