@@ -15,7 +15,7 @@ public class ChoosePlay extends StackPane {
         setAlignment(Pos.CENTER);
         setPrefSize(1280, 720);
 
-        String path = getClass().getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
+        String path = getClass().getResource("/assets/video/bgspedup4.mp4").toExternalForm();
         Media media = new Media(path);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
