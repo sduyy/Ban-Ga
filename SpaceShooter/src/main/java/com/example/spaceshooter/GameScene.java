@@ -3,12 +3,14 @@ package com.example.spaceshooter;
 import java.util.ArrayList;
 
 import javafx.animation.AnimationTimer;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -49,6 +51,7 @@ public class GameScene {
     private static MusicPlayer bgMusic;
     private static final SoundFX powerupSound = new SoundFX("powerup.wav");
     private static final SoundFX hitSound = new SoundFX("shipexplode.mp3");
+    private static VBox gameOverMenu;
 
     public static void startGame() {
         bgMusic = new MusicPlayer("eclipse.mp3");
@@ -103,9 +106,38 @@ public class GameScene {
         root.getChildren().add(pauseMenu[0]);
         pauseMenu[0].setVisible(false);
 
+        gameOverMenu = new VBox(20);
+        gameOverMenu.setAlignment(Pos.CENTER);
+        gameOverMenu.setTranslateX(1280 / 2 - 100); // căn giữa
+        gameOverMenu.setTranslateY(550);
+        gameOverMenu.setVisible(false);
+
+        MenuItem restartItem = new MenuItem("RESTART");
+        MenuItem exitItem = new MenuItem("EXIT");
+
+        restartItem.setOnActivate(() -> {
+            resetGameState();
+            gameOverMenu.setVisible(false);
+            paused = true;
+            countdownOverlay.start();
+            if (bgMusic != null) bgMusic.play();
+        });
+
+        exitItem.setOnActivate(() -> {
+            paused = false;
+            mediaPlayer.dispose();
+            if (bgMusic != null) bgMusic.stop();
+            Main.mainStage.getScene().setRoot(new StackPane());
+            StartScreen.showMenu(Main.mainStage);
+        });
+        gameOverMenu.getChildren().addAll(restartItem, exitItem);
+        root.getChildren().add(gameOverMenu);
+
         Scene scene = new Scene(root);
         Assets.load();
         resetGameState();
+
+
 
         scene.setOnKeyPressed(e -> {
             switch (e.getCode()) {
@@ -203,6 +235,7 @@ public class GameScene {
                         highScore = player.getScore();
                     }
                     if (bgMusic != null) bgMusic.stop();
+                    
                     gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.LIME);
                     gc.fillText("YOU WIN!", 1280 / 2, 340);
@@ -210,8 +243,8 @@ public class GameScene {
                     gc.setFill(Color.WHITE);
                     gc.fillText("Your Score: " + player.getScore(), 1280 / 2, 400);
                     gc.fillText("High Score: " + highScore, 1280 / 2, 440);
-                    gc.setFill(Color.LIGHTGRAY);
-                    gc.fillText("Press ESC to return to Main Menu", 1280 / 2, 500);
+                    
+                    gameOverMenu.setVisible(true);
                     return;
                 }
 
@@ -228,8 +261,8 @@ public class GameScene {
                     gc.setFill(Color.WHITE);
                     gc.fillText("Your Score: " + player.getScore(), 1280 / 2, 400);
                     gc.fillText("High Score: " + highScore, 1280 / 2, 440);
-                    gc.setFill(Color.LIGHTGRAY);
-                    gc.fillText("Press ESC to return to Main Menu", 1280 / 2, 500);
+                    
+                    gameOverMenu.setVisible(true);
                     return;
                 }
 
