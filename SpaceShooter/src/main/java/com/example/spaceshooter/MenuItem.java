@@ -13,17 +13,34 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.util.Duration;
 
+/**
+ * Mục lựa chọn trong menu (ví dụ: "NEW GAME", "EXIT", "CONTINUE"...).
+ * Hỗ trợ hiệu ứng highlight, nhấp nháy khi được chọn và hành động khi kích hoạt.
+ */
 public class MenuItem extends HBox {
-    private static final Font FONT = Font.loadFont(MenuItem.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
-    private static FadeTransition blink;
-    private static int currentItem = 0;
 
+    /** Font chữ cho văn bản menu. */
+    private static final Font FONT = Font.loadFont(MenuItem.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
+
+    /** Hiệu ứng nhấp nháy (fade) áp dụng cho menu đang được chọn. */
+    private static FadeTransition blink;
+
+    /** Âm thanh khi click chọn mục menu. */
     private static final SoundFX UIClick = new SoundFX("uiclick.wav");
 
-    private Star s1 = new Star(), s2 = new Star();
-    private Text text;
+    /** Ngôi sao bên trái. */
+    private final Star s1 = new Star();
+    /** Ngôi sao bên phải. */
+    private final Star s2 = new Star();
+    /** Văn bản hiển thị tên mục menu. */
+    private final Text text;
+    /** Hành động thực thi khi mục được chọn. */
     private Runnable script;
 
+    /**
+     * Khởi tạo một MenuItem với tên hiển thị.
+     * @param name tên hiển thị trên menu
+     */
     public MenuItem(String name) {
         super(15);
         setAlignment(Pos.CENTER);
@@ -34,14 +51,16 @@ public class MenuItem extends HBox {
 
         getChildren().addAll(s1, text, s2);
         setActive(false);
+
         setOnActivate(() -> System.out.println(name + " activated"));
 
         setOnMouseEntered(e -> {
             for (Node node : ((VBox) getParent()).getChildren()) {
-                ((MenuItem) node).setActive(false);
+                if (node instanceof MenuItem mi) {
+                    mi.setActive(false);
+                }
             }
             setActive(true);
-            currentItem = ((VBox) getParent()).getChildren().indexOf(this);
         });
 
         setOnMouseClicked(e -> {
@@ -50,15 +69,34 @@ public class MenuItem extends HBox {
         });
     }
 
+    /**
+     * Thiết lập hành động khi mục được kích hoạt.
+     * @param r đoạn mã thực thi
+     */
+    public void setOnActivate(Runnable r) {
+        script = r;
+    }
+
+    /**
+     * Kích hoạt mục menu: thực thi hành động kèm hiệu ứng nhấp nháy.
+     */
+    public void activate() {
+        flashOnce();
+        if (script != null) script.run();
+    }
+
+    /**
+     * Bật/tắt trạng thái được chọn của mục menu.
+     * @param b true nếu được chọn (highlight), false nếu không
+     */
     public void setActive(boolean b) {
         s1.setVisible(b);
         s2.setVisible(b);
 
         if (b) {
             text.setFill(Color.WHITE);
-
             blink = new FadeTransition(Duration.seconds(1.75), text);
-            blink.setFromValue(1.0);    
+            blink.setFromValue(1.0);
             blink.setToValue(0.7);
             blink.setCycleCount(FadeTransition.INDEFINITE);
             blink.setAutoReverse(true);
@@ -73,7 +111,7 @@ public class MenuItem extends HBox {
     }
 
     /**
-     * Nhấp nháy mạnh khi được chọn.
+     * Tạo hiệu ứng nhấp nháy mạnh 1 lần khi mục được chọn.
      */
     public void flashOnce() {
         FadeTransition flash = new FadeTransition(Duration.seconds(0.1), text);
@@ -84,20 +122,8 @@ public class MenuItem extends HBox {
         flash.play();
     }
 
-    public void setOnActivate(Runnable r) {
-        script = r;
-    }
-
-    public void activate() {
-        currentItem = ((VBox) getParent()).getChildren().indexOf(this);
-        flashOnce();
-        if (script != null)
-            script.run();
-    }
-
-
     /**
-     * Hình sao bên cạnh lựa chọn.
+     * Hình sao hiển thị bên cạnh văn bản menu khi mục được chọn.
      */
     private static class Star extends Parent {
         public Star() {
@@ -122,5 +148,3 @@ public class MenuItem extends HBox {
         }
     }
 }
-
-

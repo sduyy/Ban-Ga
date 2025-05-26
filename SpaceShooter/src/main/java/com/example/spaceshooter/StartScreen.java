@@ -1,8 +1,4 @@
-
 package com.example.spaceshooter;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.TranslateTransition;
@@ -24,6 +20,12 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
+/**
+ * Màn hình chính khi bắt đầu trò chơi. Hiển thị logo game, menu và nền video động.
+ */
 public class StartScreen {
     public static final Font FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 20);
     public static final Font TITLE_FONT = Font.loadFont(StartScreen.class.getResourceAsStream("/fonts/Pixel Emulator.otf"), 50);
@@ -37,7 +39,7 @@ public class StartScreen {
     private ScheduledExecutorService bgThread = Executors.newSingleThreadScheduledExecutor();
 
     /**
-     * Show the animated menu screen.
+     * Hiển thị màn hình menu chính của game.
      */
     public static void showMenu(Stage stage) {
         try {
@@ -49,21 +51,23 @@ public class StartScreen {
     }
 
     private Parent createContent() {
-        // Video background.
+        // Video nền
         String videoPath = getClass().getResource("/assets/video/space_pixel_background.mp4").toExternalForm();
         Media media = new Media(videoPath);
         MediaPlayer mediaPlayer = new MediaPlayer(media);
         mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
         mediaPlayer.setMute(true);
         mediaPlayer.play();
+
         MediaView mediaView = new MediaView(mediaPlayer);
         mediaView.setFitWidth(1280);
         mediaView.setFitHeight(720);
         mediaView.setPreserveRatio(false);
 
-        // Frame chứa tên game.
-        ContentFrame frame1 = new ContentFrame(createMiddleContent());
+        // Tiêu đề game với hiệu ứng chữ nhảy
+        ContentFrame frame1 = new ContentFrame(createAnimatedTitle("SPACE SHOOTER"));
 
+        // Các lựa chọn menu
         MenuItem newGame = new MenuItem("NEW GAME");
         newGame.setOnActivate(() -> {
             ChoosePlay choosePlay = new ChoosePlay(() -> {
@@ -80,18 +84,20 @@ public class StartScreen {
             Main.mainStage.setScene(choosePlayScene);
         });
 
+        MenuItem instructionsItem = new MenuItem("INSTRUCTIONS");
+        instructionsItem.setOnActivate(() -> instructionBox.setVisible(true));
 
+        MenuItem credits = new MenuItem("CREDITS");
+        credits.setOnActivate(() -> creditsBox.setVisible(true));
 
-        // Lựa chọn thoát game, có hiệu ứng thoát các kiểu.
-        MenuItem itemExit = new MenuItem("EXIT");
-        itemExit.setOnActivate(() -> {
-            MenuItem thisItem = getMenuItem(currentItem);
-            thisItem.flashOnce();
+        MenuItem exit = new MenuItem("EXIT");
+        exit.setOnActivate(() -> {
+            MenuItem current = getMenuItem(currentItem);
+            current.flashOnce();
 
             FadeTransition fadeUI = new FadeTransition(Duration.seconds(1.0), uiLayer);
             fadeUI.setFromValue(1.0);
             fadeUI.setToValue(0.0);
-
             fadeUI.setOnFinished(e -> {
                 Rectangle blackFade = new Rectangle(1280, 720, Color.BLACK);
                 blackFade.setOpacity(0);
@@ -103,119 +109,94 @@ public class StartScreen {
                 fadeToBlack.setOnFinished(ev -> System.exit(0));
                 fadeToBlack.play();
             });
-
             fadeUI.play();
         });
 
-        // Hộp Instruction.
-        MenuItem instructionsItem = new MenuItem("INSTRUCTIONS");
-        instructionsItem.setOnActivate(() -> {
-            instructionBox.setVisible(true);
-        });
-
-        // Hộp credits.
-        MenuItem credits = new MenuItem("CREDITS");
-        credits.setOnActivate(() -> {
-            creditsBox.setVisible(true);
-        });
-
-        // Menu lựa chọn.
-        menuBox = new VBox(10,
-                newGame,
-                instructionsItem,
-                credits,
-                itemExit);
+        // Menu tổng
+        menuBox = new VBox(10, newGame, instructionsItem, credits, exit);
         menuBox.setAlignment(Pos.CENTER);
-
         getMenuItem(0).setActive(true);
 
         VBox layout = new VBox(50, frame1, menuBox);
         layout.setAlignment(Pos.CENTER);
-
         uiLayer = new StackPane(layout);
         uiLayer.setPickOnBounds(false);
 
         root = new StackPane();
         root.setPrefSize(1280, 720);
+        root.getChildren().addAll(mediaView, uiLayer);
 
-        Rectangle bg = new Rectangle(1280, 720);
-        bg.setFill(Color.BLACK);
-        bg.widthProperty().bind(root.widthProperty());
-        bg.heightProperty().bind(root.heightProperty());
+        buildInstructionBox();
+        buildCreditsBox();
 
-        // Instructions
+        root.getChildren().addAll(instructionBox, creditsBox);
+        return root;
+    }
+
+    private void buildInstructionBox() {
         instructionBox = new VBox(10);
         instructionBox.setAlignment(Pos.CENTER);
         instructionBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
         instructionBox.setVisible(false);
 
-        Text ititle = new Text(" HOW TO PLAY");
-        ititle.setFont(TITLE_FONT);
-        ititle.setFill(Color.WHITE);
+        Text title = new Text("HOW TO PLAY");
+        title.setFont(TITLE_FONT);
+        title.setFill(Color.WHITE);
 
-        Text iline1 = new Text("1 Player");
-        Text iline2 = new Text("Move: WASD or Mouse");
-        Text iline3 = new Text("Shoot: SPACE or Left Click, Missile: M or Middle Click");
-        Text iline4 = new Text("");
-        Text iline5 = new Text("2 Players");
-        Text iline6 = new Text("Move: P1: WASD - P2: Arrow Keys");
-        Text iline7 = new Text("Shoot, Missile: P1: Space, M - P2: ENTER, SHIFT");
-        Text iline8 = new Text("");
-        Text iline9 = new Text("Dodge bullets and eliminate all enemies");
-        Text iline10 = new Text("");
-        Text iline11 = new Text("Press ESC to close");
+        String[] lines = {
+                "1 Player", "Move: WASD or Mouse", "Shoot: SPACE or Left Click, Missile: M or Middle Click", "",
+                "2 Players", "Move: P1: WASD - P2: Arrow Keys",
+                "Shoot: P1: SPACE / M | P2: ENTER / SHIFT", "",
+                "Dodge bullets and eliminate all enemies", "", "Press ESC to close"
+        };
 
-        for (Text iline : new Text[]{iline1, iline2, iline3, iline4, iline5, iline6, iline7, iline8, iline9, iline10, iline11}) {
-            iline.setFont(FONT);
-            iline.setFill(Color.LIGHTGRAY);
+        VBox content = new VBox(10);
+        content.setAlignment(Pos.CENTER);
+        content.getChildren().add(title);
+        for (String line : lines) {
+            Text t = new Text(line);
+            t.setFont(FONT);
+            t.setFill(Color.LIGHTGRAY);
+            content.getChildren().add(t);
         }
 
-        VBox icontent = new VBox(10, ititle, iline1, iline2, iline3, iline4, iline5, iline6, iline7, iline8, iline9, iline10, iline11);
-        icontent.setAlignment(Pos.CENTER);
+        instructionBox.getChildren().add(content);
+    }
 
-        instructionBox.getChildren().addAll(icontent);
-        uiLayer.getChildren().add(instructionBox);
-
-        // Credits
+    private void buildCreditsBox() {
         creditsBox = new VBox(10);
         creditsBox.setAlignment(Pos.CENTER);
         creditsBox.setStyle("-fx-background-color: rgba(0,0,0,0.85); -fx-padding: 40; -fx-background-radius: 15;");
         creditsBox.setVisible(false);
 
-        Text ctitle = new Text("PROJECT BY");
-        ctitle.setFont(TITLE_FONT);
-        ctitle.setFill(Color.WHITE);
+        Text title = new Text("PROJECT BY");
+        title.setFont(TITLE_FONT);
+        title.setFill(Color.WHITE);
 
-        Text cline1 = new Text("NGUYEN VIET DUC");
-        Text cline2 = new Text("NGUYEN SON DUY");
-        Text cline3 = new Text("NGUYEN DUY HUNG");
-        Text cline4 = new Text("");
-        Text cline5 = new Text("Press ESC to close");
+        String[] credits = {
+                "NGUYEN VIET DUC", "NGUYEN SON DUY", "NGUYEN DUY HUNG", "", "Press ESC to close"
+        };
 
-        for (Text cline : new Text[]{cline1, cline2, cline3, cline4, cline5}) {
-            cline.setFont(FONT);
-            cline.setFill(Color.LIGHTGRAY);
+        VBox content = new VBox(10);
+        content.setAlignment(Pos.CENTER);
+        content.getChildren().add(title);
+        for (String name : credits) {
+            Text t = new Text(name);
+            t.setFont(FONT);
+            t.setFill(Color.LIGHTGRAY);
+            content.getChildren().add(t);
         }
 
-        VBox ccontent = new VBox(10, ctitle, cline1, cline2, cline3, cline4, cline5);
-        ccontent.setAlignment(Pos.CENTER);
-
-        creditsBox.getChildren().addAll(ccontent);
-        uiLayer.getChildren().add(creditsBox);
-
-        root.getChildren().addAll(mediaView, uiLayer);
-        return root;
+        creditsBox.getChildren().add(content);
     }
 
-    private Node createMiddleContent() {
-        String title = "SPACE SHOOTER";
+    private Node createAnimatedTitle(String title) {
         HBox letters = new HBox(0);
         letters.setAlignment(Pos.CENTER);
         for (int i = 0; i < title.length(); i++) {
-            Text letter = new Text(title.charAt(i) + "");
+            Text letter = new Text(String.valueOf(title.charAt(i)));
             letter.setFont(TITLE_FONT);
             letter.setFill(Color.WHITE);
-            letters.getChildren().add(letter);
 
             TranslateTransition tt = new TranslateTransition(Duration.seconds(2), letter);
             tt.setDelay(Duration.millis(i * 50));
@@ -223,75 +204,70 @@ public class StartScreen {
             tt.setAutoReverse(true);
             tt.setCycleCount(TranslateTransition.INDEFINITE);
             tt.play();
-        }
 
+            letters.getChildren().add(letter);
+        }
         return letters;
     }
 
     private MenuItem getMenuItem(int index) {
-        return (MenuItem)menuBox.getChildren().get(index);
+        return (MenuItem) menuBox.getChildren().get(index);
     }
 
     private static class ContentFrame extends StackPane {
         public ContentFrame(Node content) {
             setAlignment(Pos.CENTER);
-
             Rectangle frame = new Rectangle(200, 200);
             frame.setArcWidth(25);
             frame.setArcHeight(25);
             frame.setStroke(Color.TRANSPARENT);
-
             getChildren().addAll(frame, content);
         }
     }
 
-    public void start(Stage primaryStage) throws Exception {
+    /**
+     * Khởi chạy giao diện menu chính.
+     */
+    public void start(Stage primaryStage) {
         Scene scene = new Scene(createContent(), 1280, 720);
 
         scene.setOnKeyPressed(event -> {
-            if (instructionBox.isVisible()) {
-                if (event.getCode() == KeyCode.ESCAPE) {
-                    instructionBox.setVisible(false);
-                }
+            if (instructionBox.isVisible() && event.getCode() == KeyCode.ESCAPE) {
+                instructionBox.setVisible(false);
+                return;
+            }
+            if (creditsBox.isVisible() && event.getCode() == KeyCode.ESCAPE) {
+                creditsBox.setVisible(false);
                 return;
             }
 
-            if (creditsBox.isVisible()) {
-                if (event.getCode() == KeyCode.ESCAPE) {
-                    creditsBox.setVisible(false);
+            switch (event.getCode()) {
+                case UP -> {
+                    if (currentItem > 0) {
+                        getMenuItem(currentItem).setActive(false);
+                        getMenuItem(--currentItem).setActive(true);
+                    }
                 }
-                return;
-            }
-
-            if (event.getCode() == KeyCode.UP) {
-                if (currentItem > 0) {
-                    getMenuItem(currentItem).setActive(false);
-                    getMenuItem(--currentItem).setActive(true);
+                case DOWN -> {
+                    if (currentItem < menuBox.getChildren().size() - 1) {
+                        getMenuItem(currentItem).setActive(false);
+                        getMenuItem(++currentItem).setActive(true);
+                    }
                 }
-            }
-
-            if (event.getCode() == KeyCode.DOWN) {
-                if (currentItem < menuBox.getChildren().size() - 1) {
-                    getMenuItem(currentItem).setActive(false);
-                    getMenuItem(++currentItem).setActive(true);
+                case ENTER -> {
+                    SoundFX UIClick = new SoundFX("uiclick.wav");
+                    UIClick.play();
+                    MenuItem selected = getMenuItem(currentItem);
+                    selected.flashOnce();
+                    selected.activate();
                 }
-            }
-
-            if (event.getCode() == KeyCode.ENTER) {
-                SoundFX UIClick = new SoundFX("uiclick.wav");
-                UIClick.play();
-                MenuItem selected = getMenuItem(currentItem);
-                selected.flashOnce();
-                selected.activate();
             }
         });
 
         primaryStage.setTitle("Space Shooter");
         primaryStage.setScene(scene);
         primaryStage.setResizable(false);
-        primaryStage.setOnCloseRequest(event -> {
-            bgThread.shutdownNow();
-        });
+        primaryStage.setOnCloseRequest(e -> bgThread.shutdownNow());
         primaryStage.show();
     }
 }

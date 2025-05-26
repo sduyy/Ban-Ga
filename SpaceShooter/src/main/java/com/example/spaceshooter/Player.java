@@ -1,12 +1,17 @@
 package com.example.spaceshooter;
-import javafx.scene.image.Image;
-import javafx.scene.canvas.GraphicsContext;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.image.Image;
+
+/**
+ * Lớp đại diện cho người chơi (tàu không gian do người chơi điều khiển).
+ */
 public class Player {
     private Image sprite;
     private int score = 0;
-    private int lives = 5; // Sửa: số mạng của người chơi
+    private int lives = 5;
     private double x, y;
+
     private boolean isHit = false;
     private long hitTime = 0;
     private boolean blinkState = false;
@@ -56,15 +61,14 @@ public class Player {
     }
 
     public boolean collidesWith(EnemyBullet b) {
-        return b.getX() > x && b.getX() < x + 40 && b.getY() > y && b.getY() < y + 40;
+        return b.getX() > x && b.getX() < x + 40 &&
+                b.getY() > y && b.getY() < y + 40;
     }
 
-    public double getX() {
-        return x;
-    }
-
-    public double getY() {
-        return y;
+    public boolean collidesWith(PowerUp p) {
+        double px = p.getX();
+        double py = p.getY();
+        return x < px + 30 && x + 40 > px && y < py + 30 && y + 40 > py;
     }
 
     public Bullet[] shoot() {
@@ -86,31 +90,7 @@ public class Player {
     public Missile fireMissile() {
         if (missileCount <= 0) return null;
         missileCount--;
-        return new Missile(x + 14, y, this); // 👈 truyền this vào
-    }
-
-    public boolean canFireMissile() {
-        return missileCount > 0;
-    }
-
-    public void addMissile(int amount) {
-        missileCount += amount; // Sửa: cộng thêm số lượng tên lửa chỉ định
-    }
-
-    public int getMissileCount() {
-        return missileCount;
-    }
-
-    public int getShootLevel() {
-        return shootLevel;
-    }
-
-    public int getDamageLevel() {
-        return damageLevel;
-    }
-
-    public int getFireRateLevel() {
-        return fireRateLevel;
+        return new Missile(x + 14, y, this);
     }
 
     public void update() {
@@ -131,12 +111,9 @@ public class Player {
     }
 
     public void render(GraphicsContext gc) {
-        boolean shouldBlink = (lives <= 2 && blinkState) || isHit; // Sửa: dùng lives của đối tượng
+        boolean shouldBlink = (lives <= 2 && blinkState) || isHit;
 
-        if (shouldBlink) {
-            gc.setGlobalAlpha(0.4);
-        }
-
+        if (shouldBlink) gc.setGlobalAlpha(0.4);
         gc.drawImage(sprite, x, y, 40, 40);
         gc.setGlobalAlpha(1.0);
     }
@@ -169,6 +146,30 @@ public class Player {
         };
     }
 
+    public void addMissile(int amount) {
+        missileCount += amount;
+    }
+
+    public boolean canFireMissile() {
+        return missileCount > 0;
+    }
+
+    public int getMissileCount() {
+        return missileCount;
+    }
+
+    public int getShootLevel() {
+        return shootLevel;
+    }
+
+    public int getDamageLevel() {
+        return damageLevel;
+    }
+
+    public int getFireRateLevel() {
+        return fireRateLevel;
+    }
+
     public void addScore(int value) {
         score += value;
     }
@@ -177,7 +178,6 @@ public class Player {
         return score;
     }
 
-    // Thêm phương thức get/set cho lives
     public int getLives() {
         return lives;
     }
@@ -186,10 +186,11 @@ public class Player {
         this.lives = lives;
     }
 
-    public boolean collidesWith(PowerUp p) {
-        double px = p.getX();
-        double py = p.getY();
-        return x < px + 30 && x + 40 > px && y < py + 30 && y + 40 > py;
+    public double getX() {
+        return x;
     }
 
+    public double getY() {
+        return y;
+    }
 }
