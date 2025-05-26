@@ -3,18 +3,33 @@ package com.example.spaceshooter;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
+/**
+ * Lớp đại diện cho địch Boss (kẻ địch mạnh với nhiều kiểu tấn công và hành vi phức tạp).
+ */
 public class BossEnemy extends Enemy {
+    /** Hiệu ứng âm thanh khi Boss phát nổ. */
     private static final SoundFX explodeSound = new SoundFX("missile.wav");
-    
+
+    /** Lượng máu tối đa của Boss. */
     private final int maxHP;
+    /** Chế độ tấn công hiện tại của Boss (thay đổi luân phiên). */
     protected int attackMode = 0;
+    /** Thời điểm cuối cùng chuyển chế độ tấn công. */
     private long lastSkillSwitch = System.currentTimeMillis();
+    /** Khoảng cách giữa hai lần chuyển chế độ tấn công (ms). */
     private long skillCooldown = 5000;
+    /** Thời điểm Boss bắn gần nhất. */
     private long lastShotTime = 0;
+    /** Thời gian giữa hai lần bắn (ms). */
     private long shotCooldown = 800;
+    /** Tốc độ di chuyển của Boss. */
     protected double moveSpeed = 2;
+    /** Trạng thái cuồng nộ (khi máu < 30%). */
     private boolean enraged = false;
 
+    /**
+     * Khởi tạo Boss tại vị trí (x, y), thuộc wave chỉ định.
+     */
     public BossEnemy(double x, double y, int wave) {
         super(x, y, wave);
         this.amplitude = 100;
@@ -24,12 +39,15 @@ public class BossEnemy extends Enemy {
         this.maxHP = hp;
     }
 
+    /**
+     * Cập nhật trạng thái Boss mỗi khung hình.
+     */
     @Override
     public void update() {
         angle += frequency;
-
         long now = System.currentTimeMillis();
 
+        // Chuyển sang trạng thái cuồng nộ nếu máu thấp
         if (!enraged && hp <= maxHP * 0.3) {
             enraged = true;
             skillCooldown = 3000;
@@ -37,11 +55,13 @@ public class BossEnemy extends Enemy {
             moveSpeed = 3;
         }
 
+        // Chuyển chế độ tấn công sau mỗi skillCooldown
         if (now - lastSkillSwitch > skillCooldown) {
             attackMode = (attackMode + 1) % 3;
             lastSkillSwitch = now;
         }
 
+        // Bắn theo chế độ hiện tại
         if (now - lastShotTime > shotCooldown) {
             switch (attackMode) {
                 case 0 -> fireRadialBurst();
@@ -54,11 +74,17 @@ public class BossEnemy extends Enemy {
         updateMovementForMode();
     }
 
+    /**
+     * Trả về vị trí Y với hiệu ứng dao động (sin).
+     */
     @Override
     public double getY() {
         return baseY + Math.sin(angle * 1.5) * 20;
     }
 
+    /**
+     * Vẽ Boss và thanh máu.
+     */
     @Override
     public void render(GraphicsContext gc) {
         double x = getX();
@@ -71,17 +97,26 @@ public class BossEnemy extends Enemy {
         gc.fillRect(x, y - 10, (hp / (double) maxHP) * 80, 8);
     }
 
+    /**
+     * Kiểm tra va chạm giữa Boss và đạn của người chơi.
+     */
     @Override
     public boolean collidesWith(Bullet b) {
         return b.getX() > getX() && b.getX() < getX() + 80 &&
                 b.getY() > getY() && b.getY() < getY() + 80;
     }
 
+    /**
+     * Boss bắn 1 viên đạn thẳng xuống (mặc định).
+     */
     @Override
     public EnemyBullet shoot() {
         return new BossEnemyBullet(getX() + 35, getY() + 80, 0, 5);
     }
 
+    /**
+     * Gây sát thương lên Boss. Trả về true nếu bị tiêu diệt.
+     */
     @Override
     public boolean takeDamage(int damage) {
         hp -= damage;
@@ -89,9 +124,12 @@ public class BossEnemy extends Enemy {
             explodeSound.play();
             return true;
         }
-        return hp <= 0;
+        return false;
     }
 
+    /**
+     * Tấn công theo kiểu bắn vòng tròn (trừ một góc để tạo khoảng tránh).
+     */
     private void fireRadialBurst() {
         int count = 12;
         double angleStep = 2 * Math.PI / count;
@@ -108,6 +146,9 @@ public class BossEnemy extends Enemy {
         }
     }
 
+    /**
+     * Tấn công theo kiểu nhắm vào người chơi.
+     */
     private void fireAimedShot(Player player) {
         double dx = player.getX() - getX();
         double dy = player.getY() - getY();
@@ -117,6 +158,9 @@ public class BossEnemy extends Enemy {
         GameScene.enemyBullets.add(new BossEnemyBullet(getX() + 40, getY() + 40, dx, dy));
     }
 
+    /**
+     * Tấn công theo kiểu bắn dàn ngang hướng về người chơi.
+     */
     private void fireStrafeBurst(Player player) {
         double dx = player.getX() - getX();
         double dy = player.getY() - getY();
@@ -130,6 +174,9 @@ public class BossEnemy extends Enemy {
         }
     }
 
+    /**
+     * Cập nhật chuyển động tùy theo chế độ tấn công.
+     */
     private void updateMovementForMode() {
         switch (attackMode) {
             case 0 -> startX += Math.sin(System.currentTimeMillis() * 0.001) * 0.5;
@@ -142,12 +189,9 @@ public class BossEnemy extends Enemy {
                 if (startX < 50 || startX > 1280 - 130) moveSpeed *= -1;
             }
         }
-        double minX = 100;
-        double maxX = 1180;
-        double minY = 40;
-        double maxY = 320;
 
-        startX = Math.max(minX, Math.min(startX, maxX));
-        baseY = Math.max(minY, Math.min(baseY, maxY));
+        // Giới hạn phạm vi di chuyển
+        startX = Math.max(100, Math.min(startX, 1180));
+        baseY = Math.max(40, Math.min(baseY, 320));
     }
 }

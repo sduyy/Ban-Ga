@@ -16,6 +16,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
+/**
+ * Lớp đại diện.
+ */
 public class GameScene {
     static Player player;
     static Player player2;
@@ -28,11 +31,7 @@ public class GameScene {
     static ArrayList<EnemyBullet> enemyBullets = new ArrayList<>();
     static ArrayList<Explosion> explosions = new ArrayList<>();
     static ArrayList<PowerUp> powerUps = new ArrayList<>();
-
-    // (Đã bỏ biến static score, dùng score trong Player)
     static int highScore = HighScoreManager.getHighScore();
-    // (Đã bỏ biến static lives, dùng lives riêng cho player)
-    // (Đã bỏ biến static lives2, dùng lives riêng cho player2)
     static int wave = 1;
     static boolean waveSpawned = false;
     static boolean gameOver = false;
@@ -50,6 +49,9 @@ public class GameScene {
     private static final SoundFX powerupSound = new SoundFX("powerup.wav");
     private static final SoundFX hitSound = new SoundFX("shipexplode.mp3");
 
+    /**
+     * Khởi tạo và bắt đầu trò chơi.
+     */
     public static void startGame() {
         bgMusic = new MusicPlayer("eclipse.mp3");
         bgMusic.play();
@@ -187,6 +189,11 @@ public class GameScene {
         });
     }
 
+    /**
+     * Bắt đầu vòng lặp trò chơi.
+     * Vòng lặp này sẽ cập nhật trạng thái trò chơi
+     * @param gc
+     */
     private static void startGameLoop(GraphicsContext gc) {
         if (gameLoop != null) gameLoop.stop();
 
@@ -215,6 +222,9 @@ public class GameScene {
                     return;
                 }
 
+                /**
+                 * Nếu trò chơi đã kết thúc (game over) thì hiển thị thông báo
+                 */
                 if (gameOver) {
                     if (player.getScore() > highScore) {
                         HighScoreManager.saveHighScore(player.getScore());
@@ -333,6 +343,9 @@ public class GameScene {
                     }
                 }
 
+                /**
+                 * Cập nhật và vẽ tên lửa (missiles) nếu có
+                 */
                 ArrayList<Missile> missilesToRemove = new ArrayList<>();
                 for (Missile m : missiles) {
                     if (!m.update(enemies, explosions, powerUps)) {
@@ -346,7 +359,7 @@ public class GameScene {
                         if (e.collidesWith(m)) {
                             m.explode(enemies, explosions, powerUps);
                             missilesToRemove.add(m);
-                            break; // Dừng kiểm tra sau khi tên lửa nổ
+                            break;
                         }
                     }
                 }
@@ -385,15 +398,15 @@ public class GameScene {
 
                     boolean hit = false;
 
-                    if (player.getLives() > 0 && player.collidesWith(b)) { // Sửa: chỉ xử lý khi còn mạng
-                        player.setLives(player.getLives() - 1); // Sửa: trừ mạng player1
+                    if (player.getLives() > 0 && player.collidesWith(b)) {
+                        player.setLives(player.getLives() - 1);
                         explosions.add(new Explosion(player.getX(), player.getY()));
                         player.markHit();
                         hit = true;
                     }
 
-                    if (isTwoPlayerMode && player2 != null && player2.getLives() > 0 && player2.collidesWith(b)) { // Sửa: chỉ xử lý khi còn mạng
-                        player2.setLives(player2.getLives() - 1); // Sửa: trừ mạng player2
+                    if (isTwoPlayerMode && player2 != null && player2.getLives() > 0 && player2.collidesWith(b)) {
+                        player2.setLives(player2.getLives() - 1);
                         explosions.add(new Explosion(player2.getX(), player2.getY()));
                         player2.markHit();
                         hit = true;
@@ -403,6 +416,10 @@ public class GameScene {
                     return hit;
                 });
 
+                /**
+                 * Kiểm tra va chạm giữa đạn của người chơi và địch,
+                 * cũng như xử lý va chạm với người chơi.
+                 */
                 ArrayList<Enemy> toRemove = new ArrayList<>();
                 for (Enemy e : enemies) {
                     for (Bullet b : bullets) {
@@ -417,53 +434,49 @@ public class GameScene {
                                         (e instanceof BossEnemy ? 500 : 100);
 
                                 Player owner = b.getOwner();
-                                owner.addScore(earned); // Sửa: cộng điểm cho người bắn
+                                owner.addScore(earned);
                                 dropPowerUps(e);
                             }
                         }
                     }
-                    boolean enemyRemoved = false; // Sửa: theo dõi việc enemy đã bị loại bỏ
+                    boolean enemyRemoved = false;
                     if (player.getLives() > 0 && player.collidesWith(e)) {
-                        // Player 1 va chạm với địch
-                        player.setLives(player.getLives() - 1); // Sửa: trừ mạng player1
+                        player.setLives(player.getLives() - 1);
                         explosions.add(new Explosion(player.getX(), player.getY()));
                         player.markHit();
-                        // Xử lý địch khi va chạm với player1
                         if (e instanceof BossEnemy || e instanceof SuperBossEnemy || e instanceof MiniBossEnemy) {
                             if (e.takeDamage(1)) {
                                 enemyRemoved = true;
                                 toRemove.add(e);
                                 explosions.add(new Explosion(e.getX(), e.getY()));
                                 if (e instanceof SuperBossEnemy) superBossDefeated = true;
-                                player.addScore((e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100)); // Sửa: cộng điểm cho player1
+                                player.addScore((e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100));
                                 dropPowerUps(e);
                             }
                         } else {
                             enemyRemoved = true;
                             toRemove.add(e);
-                            player.addScore(100); // Sửa: player1 tiêu diệt địch thường +100 điểm
+                            player.addScore(100);
                         }
                         checkGameOver();
                     }
                     if (isTwoPlayerMode && !enemyRemoved && player2 != null && player2.getLives() > 0 && player2.collidesWith(e)) {
-                        // Player 2 va chạm với địch (chưa bị loại bởi player1)
-                        player2.setLives(player2.getLives() - 1); // Sửa: trừ mạng player2
+                        player2.setLives(player2.getLives() - 1);
                         explosions.add(new Explosion(player2.getX(), player2.getY()));
                         player2.markHit();
-                        // Xử lý địch khi va chạm với player2
                         if (e instanceof BossEnemy || e instanceof SuperBossEnemy || e instanceof MiniBossEnemy) {
                             if (e.takeDamage(1)) {
                                 enemyRemoved = true;
                                 toRemove.add(e);
                                 explosions.add(new Explosion(e.getX(), e.getY()));
                                 if (e instanceof SuperBossEnemy) superBossDefeated = true;
-                                player2.addScore((e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100)); // Sửa: cộng điểm cho player2
+                                player2.addScore((e instanceof SuperBossEnemy) ? 1000 : (e instanceof BossEnemy ? 500 : 100));
                                 dropPowerUps(e);
                             }
                         } else {
                             enemyRemoved = true;
                             toRemove.add(e);
-                            player2.addScore(100); // Sửa: player2 tiêu diệt địch thường +100 điểm
+                            player2.addScore(100);
                         }
                         checkGameOver();
                     }
@@ -485,7 +498,7 @@ public class GameScene {
                             powerupSound.play();
                             p.collect();
                             applyPowerUpToPlayer(player, p.getType());
-                            player.addScore(30); // Sửa: cộng điểm cho player1 nhặt vật phẩm
+                            player.addScore(30);
                             return true;
                         } else if (isTwoPlayerMode && player2 != null && player2.collidesWith(p)) {
                             powerupSound.play();
@@ -505,6 +518,10 @@ public class GameScene {
         gameLoop.start();
     }
 
+    /**
+     * Vẽ giao diện người dùng (HUD) lên
+     * @param gc
+     */
     private static void drawHUD(GraphicsContext gc) {
         gc.setFont(Font.font(StartScreen.FONT.getFamily(), 13));
         gc.setFill(Color.BLACK);
@@ -560,9 +577,14 @@ public class GameScene {
         }
     }
 
+    /**
+     *  Áp dụng hiệu ứng tăng cường (power-up) cho người chơi.
+     *  Tăng cường có thể là tăng máu, tên lửa, đạn, sát thương hoặc tốc độ bắn.
+     * @param type
+     */
     private static void applyPowerUp(PowerUpType type) {
         switch (type) {
-            case HEALTH -> player.setLives(Math.min(player.getLives() + 1, 5)); // Sửa: tăng mạng cho player1
+            case HEALTH -> player.setLives(Math.min(player.getLives() + 1, 5));
             case ROCKET -> player.addMissile(1);
             case AMMO -> player.upgradeShootLevel();
             case DAMAGE -> player.upgradeDamageLevel();
@@ -570,12 +592,18 @@ public class GameScene {
         }
     }
 
+    /**
+     * Áp dụng hiệu ứng tăng cường (power-up) cho người chơi.
+     * Nếu là chế độ hai người chơi, sẽ áp dụng cho người chơi thứ hai nếu có.
+     * @param p
+     * @param type
+     */
     private static void applyPowerUpToPlayer(Player p, PowerUpType type) {
         if (p == player) {
-            applyPowerUp(type); // dùng hàm sẵn có cho player1
+            applyPowerUp(type);
         } else if (p == player2) {
             switch (type) {
-                case HEALTH -> player2.setLives(Math.min(player2.getLives() + 1, 5)); // Sửa: tăng mạng cho player2
+                case HEALTH -> player2.setLives(Math.min(player2.getLives() + 1, 5));
                 case ROCKET -> player2.addMissile(1);
                 case AMMO -> player2.upgradeShootLevel();
                 case DAMAGE -> player2.upgradeDamageLevel();
@@ -584,18 +612,23 @@ public class GameScene {
         }
     }
 
+    /**
+     * Thả các hiệu ứng tăng cường (power-ups) khi một kẻ địch bị tiêu diệt.
+     * Nếu là trùm (BossEnemy hoặc SuperBossEnemy), sẽ thả nhiều loại power-up.
+     * @param e
+     */
     public static void dropPowerUps(Enemy e) {
         double x = e.getX(), y = e.getY();
         if (e instanceof BossEnemy || e instanceof SuperBossEnemy) {
             powerUps.add(new PowerUp(x, y, PowerUpType.ROCKET));
             if ((player.getLives() < 5) || (player2 != null && player2.getLives() < 5))
-                powerUps.add(new PowerUp(x + 10, y, PowerUpType.HEALTH)); // Sửa: xét cả player2
+                powerUps.add(new PowerUp(x + 10, y, PowerUpType.HEALTH));
             if ((player.getFireRateLevel() < 3) || (player2 != null && player2.getFireRateLevel() < 3))
-                powerUps.add(new PowerUp(x + 20, y, PowerUpType.ENERGY)); // Sửa: xét cả player2
+                powerUps.add(new PowerUp(x + 20, y, PowerUpType.ENERGY));
             if ((player.getShootLevel() < 3) || (player2 != null && player2.getShootLevel() < 3))
-                powerUps.add(new PowerUp(x + 30, y, PowerUpType.AMMO)); // Sửa: xét cả player2
+                powerUps.add(new PowerUp(x + 30, y, PowerUpType.AMMO));
             if ((player.getDamageLevel() < 3) || (player2 != null && player2.getDamageLevel() < 3))
-                powerUps.add(new PowerUp(x + 40, y, PowerUpType.DAMAGE)); // Sửa: xét cả player2
+                powerUps.add(new PowerUp(x + 40, y, PowerUpType.DAMAGE));
         } else {
             if (Math.random() < 0.25) {
                 PowerUpType type = switch ((int) (Math.random() * 4)) {
@@ -609,6 +642,11 @@ public class GameScene {
         }
     }
 
+    /**
+     * Sinh ra một làn sóng kẻ địch mới dựa trên số lượng sóng hiện tại.
+     * Nếu làn sóng là 16, sẽ sinh ra một trùm siêu mạnh (SuperBossEnemy).
+     * @param waveNum
+     */
     private static void spawnWave(int waveNum) {
         if (waveNum == 16) {
             enemies.add(new SuperBossEnemy(590, 50, waveNum));
@@ -635,14 +673,23 @@ public class GameScene {
         }
     }
 
+    /**
+     * Kiểm tra xem trò chơi đã kết thúc hay chưa.
+     * Nếu là chế độ hai người chơi, trò chơi kết thúc khi cả hai người chơi đều hết mạng.
+     * Nếu là chế độ một người chơi, trò chơi kết thúc khi người chơi hết mạng.
+     */
     private static void checkGameOver() {
         if (!isTwoPlayerMode) {
-            if (player.getLives() <= 0) gameOver = true; // Sửa: dùng số mạng player
+            if (player.getLives() <= 0) gameOver = true;
         } else {
-            if (player.getLives() <= 0 && player2.getLives() <= 0) gameOver = true; // Sửa: cả 2 người chết mới thua
+            if (player.getLives() <= 0 && player2.getLives() <= 0) gameOver = true;
         }
     }
 
+    /**
+     * Đặt lại trạng thái trò chơi về ban đầu.
+     * Xóa tất cả các đối tượng như đạn, kẻ địch, hiệu ứng nổ, vật phẩm tăng cường, v.v.
+     */
     protected static void resetGameState() {
         bullets.clear();
         missiles.clear();
@@ -650,7 +697,6 @@ public class GameScene {
         enemyBullets.clear();
         explosions.clear();
         powerUps.clear();
-        // (Bỏ đặt lại score & lives, dùng Player.setLives và Player.score)
         wave = 1;
         waveSpawned = false;
         gameOver = false;
@@ -661,11 +707,11 @@ public class GameScene {
         autoPlay = false;
 
         player = new Player(420, 640, Assets.player);
-        player.setLives(5); // Sửa: thiết lập số mạng cho player1
+        player.setLives(5);
 
         if (isTwoPlayerMode) {
             player2 = new Player(820, 640, Assets.player2);
-            player2.setLives(5); // Sửa: thiết lập số mạng cho player2
+            player2.setLives(5);
             autoPlay = false;
         } else {
             player2 = null;
