@@ -473,8 +473,8 @@ public class GameScene {
                  * cũng như xử lý va chạm với người chơi.
                  */
                 ArrayList<Enemy> toRemove = new ArrayList<>();
-                for (Enemy e : new ArrayList<>(enemies)) { // ✅ an toàn
-                    for (Bullet b : new ArrayList<>(bullets)) { // ✅ an toàn
+                for (Enemy e : new ArrayList<>(enemies)) {
+                    for (Bullet b : new ArrayList<>(bullets)) {
                         if (e.collidesWith(b)) {
                             b.kill();
                             if (e.takeDamage(b.getDamage())) {
@@ -534,7 +534,7 @@ public class GameScene {
                         checkGameOver();
                     }
                 }
-                enemies.removeAll(toRemove); // ✅ an toàn
+                enemies.removeAll(toRemove);
 
                 explosions.removeIf(ex -> {
                     ex.render(gc);
