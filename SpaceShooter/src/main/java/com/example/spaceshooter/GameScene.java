@@ -242,7 +242,7 @@ public class GameScene {
                         highScore = player.getScore();
                     }
                     if (bgMusic != null) bgMusic.stop();
-                    
+
                     gc.setFont(StartScreen.TITLE_FONT);
                     gc.setFill(Color.LIME);
                     gc.fillText("YOU WIN!", 1280 / 2, 340);
@@ -250,7 +250,7 @@ public class GameScene {
                     gc.setFill(Color.WHITE);
                     gc.fillText("Your Score: " + player.getScore(), 1280 / 2, 400);
                     gc.fillText("High Score: " + highScore, 1280 / 2, 440);
-                    
+
                     gameOverMenu.setVisible(true);
                     return;
                 }
@@ -271,7 +271,7 @@ public class GameScene {
                     gc.setFill(Color.WHITE);
                     gc.fillText("Your Score: " + player.getScore(), 1280 / 2, 400);
                     gc.fillText("High Score: " + highScore, 1280 / 2, 440);
-                    
+
                     gameOverMenu.setVisible(true);
                     return;
                 }
@@ -310,7 +310,7 @@ public class GameScene {
                             .orElse(null);
 
                     boolean interruptedByBuff = false;
-                    if (nearestBuff != null && Math.abs(nearestBuff.getY() - player.getY()) < 50) {
+                    if (nearestBuff != null && Math.abs(nearestBuff.getY() - player.getY()) < 150) {
                         double px = player.getX();
                         double bx = nearestBuff.getX();
                         if (Math.abs(px - bx) > 10) {
@@ -407,8 +407,27 @@ public class GameScene {
                 }
 
                 if (!enemies.isEmpty()) {
-                    new ArrayList<>(enemies).forEach(Enemy::update);
-                    new ArrayList<>(enemies).forEach(e -> e.render(gc));
+                    ArrayList<Enemy> toRemove = new ArrayList<>();
+                    for (Enemy e : new ArrayList<>(enemies)) {
+                        e.update();
+
+                        if (e.getY() > 720) {
+                            if (isTwoPlayerMode && player2 != null) {
+                                player.setLives(player.getLives() - 1);
+                                player2.setLives(player2.getLives() - 1);
+                            } else {
+                                player.setLives(player.getLives() - 1);
+                            }
+                            toRemove.add(e);
+                            checkGameOver();
+                        }
+                    }
+
+                    enemies.removeAll(toRemove);
+
+                    for (Enemy e : enemies) {
+                        e.render(gc);
+                    }
                 } else waveSpawned = false;
 
                 if (now - lastEnemyShot > 1_500_000_000L) {
@@ -454,8 +473,8 @@ public class GameScene {
                  * cũng như xử lý va chạm với người chơi.
                  */
                 ArrayList<Enemy> toRemove = new ArrayList<>();
-                for (Enemy e : enemies) {
-                    for (Bullet b : bullets) {
+                for (Enemy e : new ArrayList<>(enemies)) { // ✅ an toàn
+                    for (Bullet b : new ArrayList<>(bullets)) { // ✅ an toàn
                         if (e.collidesWith(b)) {
                             b.kill();
                             if (e.takeDamage(b.getDamage())) {
@@ -472,7 +491,9 @@ public class GameScene {
                             }
                         }
                     }
+
                     boolean enemyRemoved = false;
+
                     if (player.getLives() > 0 && player.collidesWith(e)) {
                         player.setLives(player.getLives() - 1);
                         explosions.add(new Explosion(player.getX(), player.getY()));
@@ -493,13 +514,13 @@ public class GameScene {
                         }
                         checkGameOver();
                     }
+
                     if (isTwoPlayerMode && !enemyRemoved && player2 != null && player2.getLives() > 0 && player2.collidesWith(e)) {
                         player2.setLives(player2.getLives() - 1);
                         explosions.add(new Explosion(player2.getX(), player2.getY()));
                         player2.markHit();
                         if (e instanceof BossEnemy || e instanceof SuperBossEnemy || e instanceof MiniBossEnemy) {
                             if (e.takeDamage(1)) {
-                                enemyRemoved = true;
                                 toRemove.add(e);
                                 explosions.add(new Explosion(e.getX(), e.getY()));
                                 if (e instanceof SuperBossEnemy) superBossDefeated = true;
@@ -507,14 +528,13 @@ public class GameScene {
                                 dropPowerUps(e);
                             }
                         } else {
-                            enemyRemoved = true;
                             toRemove.add(e);
                             player2.addScore(100);
                         }
                         checkGameOver();
                     }
                 }
-                enemies.removeAll(toRemove);
+                enemies.removeAll(toRemove); // ✅ an toàn
 
                 explosions.removeIf(ex -> {
                     ex.render(gc);
@@ -663,7 +683,7 @@ public class GameScene {
             if ((player.getDamageLevel() < 3) || (player2 != null && player2.getDamageLevel() < 3))
                 powerUps.add(new PowerUp(x + 40, y, PowerUpType.DAMAGE));
         } else {
-            if (Math.random() < 0.25) {
+            if (Math.random() < 1.0) {
                 PowerUpType type = switch ((int) (Math.random() * 4)) {
                     case 0 -> PowerUpType.HEALTH;
                     case 1 -> PowerUpType.ENERGY;
@@ -687,30 +707,19 @@ public class GameScene {
         } else if (waveNum % 5 == 0) {
             enemies.add(new BossEnemy(600, 50, waveNum));
             return;
+        } else if (waveNum % 5 != 0 && waveNum < 16 ) {
+            double x = 100 + Math.random() * 1000;
+            double y = -40;
+            enemies.add(new FallingEnemy(x, y, waveNum));
         }
 
-        int count = switch (waveNum % 4) {
-            case 1, 0 -> 10;
-            case 2 -> 9;
-            default -> 12;
-        };
 
-        double spacing = 100;
-        double totalWidth = (count - 1) * spacing;
-        double startX = (1280 - totalWidth - 40) / 2;
-
-        for (int i = 0; i < count; i++) {
-            double x = startX + i * spacing;
-            double y = 100 + (i % 2) * 40;
-            enemies.add(new Enemy(x, y, waveNum));
-        }
     }
-
-    /**
-     * Kiểm tra xem trò chơi đã kết thúc hay chưa.
-     * Nếu là chế độ hai người chơi, trò chơi kết thúc khi cả hai người chơi đều hết mạng.
-     * Nếu là chế độ một người chơi, trò chơi kết thúc khi người chơi hết mạng.
-     */
+        /**
+         * Kiểm tra xem trò chơi đã kết thúc hay chưa.
+         * Nếu là chế độ hai người chơi, trò chơi kết thúc khi cả hai người chơi đều hết mạng.
+         * Nếu là chế độ một người chơi, trò chơi kết thúc khi người chơi hết mạng.
+         */
     private static void checkGameOver() {
         if (!isTwoPlayerMode) {
             if (player.getLives() <= 0) gameOver = true;

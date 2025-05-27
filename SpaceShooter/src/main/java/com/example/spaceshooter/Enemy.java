@@ -34,7 +34,7 @@ public class Enemy {
         this.startX = x;
         this.baseY = y;
         this.frequency = 0.01 + Math.min(wave * 0.002, 0.03);
-        this.hp = 10 + 2 * (wave - 1) + 2 * ((wave - 1) / 3) + wave * 10;
+        this.hp = 2 * (wave - 1) + 2 * ((wave - 1) / 3) + wave * 10;
     }
 
     /**

@@ -28,7 +28,7 @@ public class SuperBossEnemy extends Enemy {
      */
     public SuperBossEnemy(double x, double y, int wave) {
         super(x, y, wave);
-        this.hp = (int)((500 + wave * 30) * 3.0);
+        this.hp = (int)((500 + wave * 30) * 2.5);
         this.maxHp = hp;
         this.amplitude = 120;
         this.frequency = 0.006 + wave * 0.001;

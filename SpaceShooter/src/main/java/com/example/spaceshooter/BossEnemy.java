@@ -191,7 +191,7 @@ public class BossEnemy extends Enemy {
         }
 
         // Giới hạn phạm vi di chuyển
-        startX = Math.max(100, Math.min(startX, 1180));
+        startX = Math.max(300, Math.min(startX, 900));
         baseY = Math.max(40, Math.min(baseY, 320));
     }
 }
