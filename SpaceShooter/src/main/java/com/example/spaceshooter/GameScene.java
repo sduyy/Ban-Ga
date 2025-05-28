@@ -110,7 +110,7 @@ public class GameScene {
 
         gameOverMenu = new VBox(20);
         gameOverMenu.setAlignment(Pos.CENTER);
-        gameOverMenu.setTranslateX(1280 / 2 - 100); // căn giữa
+        gameOverMenu.setTranslateX(1280 / 2 - 80); // căn giữa
         gameOverMenu.setTranslateY(550);
         gameOverMenu.setVisible(false);
 
@@ -310,7 +310,7 @@ public class GameScene {
                             .orElse(null);
 
                     boolean interruptedByBuff = false;
-                    if (nearestBuff != null && Math.abs(nearestBuff.getY() - player.getY()) < 150) {
+                    if (nearestBuff != null && Math.abs(nearestBuff.getY() - player.getY()) < 80) {
                         double px = player.getX();
                         double bx = nearestBuff.getX();
                         if (Math.abs(px - bx) > 10) {
@@ -683,7 +683,7 @@ public class GameScene {
             if ((player.getDamageLevel() < 3) || (player2 != null && player2.getDamageLevel() < 3))
                 powerUps.add(new PowerUp(x + 40, y, PowerUpType.DAMAGE));
         } else {
-            if (Math.random() < 1.0) {
+            if (Math.random() < 0.8) {
                 PowerUpType type = switch ((int) (Math.random() * 4)) {
                     case 0 -> PowerUpType.HEALTH;
                     case 1 -> PowerUpType.ENERGY;
@@ -708,11 +708,13 @@ public class GameScene {
             enemies.add(new BossEnemy(600, 50, waveNum));
             return;
         } else if (waveNum % 5 != 0 && waveNum < 16 ) {
-            double x = 100 + Math.random() * 1000;
-            double y = -40;
-            enemies.add(new FallingEnemy(x, y, waveNum));
-        }
+            for(int i = 0; i < 2; i++) {
+                double x = 100 + Math.random() * 1000;
+                double y = -40;
+                enemies.add(new FallingEnemy(x, y, waveNum));
+            }
 
+        }
 
     }
         /**
