@@ -43,14 +43,13 @@
 
 ## 🎁 Các loại Power-Up
 
-| Power-Up       | Tác dụng                                 |
-|----------------|------------------------------------------|
-| Triple Shot    | Bắn 3 viên đạn cùng lúc                  |
-| Missile        | Bắn tên lửa mạnh                         |
-| Shield         | Khiên bảo vệ tàu tạm thời                |
-| Heal           | Hồi máu cho tàu                          |
-| Speed Up       | Tăng tốc độ bắn                          |
-| Freeze         | Làm chậm toàn bộ kẻ địch tạm thời        |
+| Power-Up   | Tác dụng                   |
+|------------|----------------------------|
+| HEALTH     | Hồi máu                    |
+| ENERGY     | Tăng tốc độ bắn            |
+| AMMO       | Tăng số lương đạn bắn      |
+| DAMAGE     | Tăng sát thương đạn bắn    |
+| ROCKET     | Tăng số lượng tên lửa      |
 
 ---
 
@@ -62,3 +61,4 @@ Vì đây là bài tập lớn môn OOP nên buộc phải làm...
 ### ✅ Cảm nghĩ khi làm xong
 Mệt vl nhưng cũng vui dù là dự án xong từ tháng 5 rồi nhưng mà giờ là tháng 7 mới ngồi hoạn thiện nốt để gửi cho mn chơi.
 Cảm ơn Duy và Hưng là những partners tuyệt vời mỗi tội mấy ngày cuối hơi lười xíu
+                                                                         --README này được viết bởi Đức 2 tháng sau khi chấm bài xong--
